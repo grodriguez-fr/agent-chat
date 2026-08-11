@@ -106,4 +106,5 @@ export type AgentChatSlots = {
   renderMarkdown?: (markdown: string, streaming: boolean) => ReactNode;
   renderToolDetail?: (tool: AgentToolActivity) => ReactNode;
   renderMessageSlot?: (id: string, value: unknown) => ReactNode;
+  renderMessageActions?: (message: AgentMessage) => ReactNode;
 };

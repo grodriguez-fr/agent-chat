@@ -45,7 +45,9 @@ function MessageRow({ message, controller, slots, finalOnly = false }: { message
   const text = messageText(message);
   return <div className={`agent-chat__message agent-chat__message--${message.role}`} data-agent-user-message={message.role === "user" ? "true" : undefined}>
     <MessageContent message={message} slots={slots} finalOnly={finalOnly} />
-    {text && <div className="agent-chat__message-actions"><button type="button" onClick={() => void navigator.clipboard?.writeText(text)} aria-label="Copier"><Copy size={13} /></button>{controller.retryMessage && <button type="button" onClick={() => controller.retryMessage?.(message.id)} aria-label="Réessayer"><RotateCcw size={13} /></button>}</div>}
+    {slots?.renderMessageActions
+      ? slots.renderMessageActions(message)
+      : text && <div className="agent-chat__message-actions"><button type="button" onClick={() => void navigator.clipboard?.writeText(text)} aria-label="Copier"><Copy size={13} /></button>{controller.retryMessage && <button type="button" onClick={() => controller.retryMessage?.(message.id)} aria-label="Réessayer"><RotateCcw size={13} /></button>}</div>}
   </div>;
 }
 
