@@ -1,0 +1,1 @@
+{"version":3,"file":"ConversationSidebar.d.ts","sourceRoot":"","sources":["../../src/react/ConversationSidebar.tsx"],"names":[],"mappings":"AAEA,OAAO,EAAsB,KAAK,mBAAmB,EAAE,MAAM,kBAAkB,CAAC;AAEhF,wBAAgB,mBAAmB,CAAC,EAAE,UAAU,EAAE,SAAS,EAAE,UAAU,EAAE,EAAE;IAAE,UAAU,EAAE,mBAAmB,CAAC;IAAC,SAAS,EAAE,MAAM,CAAC;IAAC,UAAU,CAAC,EAAE,MAAM,IAAI,CAAA;CAAE,2CAgDzJ"}
