@@ -1,0 +1,39 @@
+{
+  "name": "@grodriguez-fr/agent-chat",
+  "version": "0.1.0",
+  "description": "Shared agent chat UI and client primitives for Talos, LOGOS and job-finder",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": ["./dist/styles.css"],
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    "./core": { "types": "./dist/core/index.d.ts", "import": "./dist/core/index.js" },
+    "./react": { "types": "./dist/react/index.d.ts", "import": "./dist/react/index.js" },
+    "./client": { "types": "./dist/client/index.d.ts", "import": "./dist/client/index.js" },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-styles.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "prepack": "npm run test"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=0.468.0 <2",
+    "react": ">=19 <20",
+    "react-dom": ">=19 <20"
+  },
+  "dependencies": {
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": { "access": "public" }
+}
