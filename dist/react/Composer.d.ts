@@ -1,7 +1,11 @@
+import { type KeyboardEventHandler } from "react";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
-export declare function AgentComposer({ controller, slots, placeholder }: {
+export type AgentComposerProps = {
     controller: AgentChatController;
     slots?: AgentChatSlots;
     placeholder?: string;
-}): import("react/jsx-runtime").JSX.Element;
+    settingsMenuSide?: "up" | "down";
+    onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
+};
+export declare function AgentComposer({ controller, slots, placeholder, settingsMenuSide, onKeyDown }: AgentComposerProps): import("react").JSX.Element;
 //# sourceMappingURL=Composer.d.ts.map

@@ -14,5 +14,5 @@ export type AgentChatShellProps = {
     onExpand?: () => void;
     panelWidth?: string;
 };
-export declare function AgentChatShell({ variant, controller, brandName, slots, suggestions, emptyTitle, emptyDescription, placeholder, className, open, onClose, onExpand, panelWidth }: AgentChatShellProps): import("react/jsx-runtime").JSX.Element | null;
+export declare function AgentChatShell({ variant, controller, brandName, slots, suggestions, emptyTitle, emptyDescription, placeholder, className, open, onClose, onExpand, panelWidth }: AgentChatShellProps): import("react").JSX.Element | null;
 //# sourceMappingURL=AgentChatShell.d.ts.map

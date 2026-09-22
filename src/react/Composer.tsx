@@ -1,57 +1,65 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Check, Mic, Paperclip, Pencil, Square, X } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEventHandler } from "react";
+import { ArrowUp, LoaderCircle, Mic, Paperclip, Square } from "lucide-react";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
+import { ComposerQueue } from "./ComposerQueue.js";
+import { useDictation } from "./useDictation.js";
+import { ComposerSettingsPicker } from "./ComposerSettingsPicker.js";
 
-type SpeechRecognitionCtor = new () => { lang: string; continuous: boolean; interimResults: boolean; start(): void; stop(): void; onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null };
+export type AgentComposerProps = {
+  controller: AgentChatController;
+  slots?: AgentChatSlots;
+  placeholder?: string;
+  settingsMenuSide?: "up" | "down";
+  onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
+};
 
-export function AgentComposer({ controller, slots, placeholder = "Demande à l’agent…" }: { controller: AgentChatController; slots?: AgentChatSlots; placeholder?: string }) {
+export function AgentComposer({ controller, slots, placeholder = "Demande à l’agent…", settingsMenuSide = "up", onKeyDown }: AgentComposerProps) {
   const textarea = useRef<HTMLTextAreaElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
-  const recognition = useRef<InstanceType<SpeechRecognitionCtor> | null>(null);
-  const [listening, setListening] = useState(false);
-  const [editing, setEditing] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
-  const canSend = Boolean(controller.input.trim()) && !controller.disabled;
-
+  const pending = useRef(false);
+  const latestInput = useRef(controller.input);
+  latestInput.current = controller.input;
+  const [submitting, setSubmitting] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const voice = useDictation(controller.input, controller.setInput);
+  const busy = controller.status === "streaming" || controller.status === "connecting";
+  const canSend = (Boolean(controller.input.trim()) || controller.hasAttachments) && !controller.disabled && !controller.sendingDisabled && !submitting && (!busy || controller.allowQueue);
   useEffect(() => {
-    if (!textarea.current) return;
-    textarea.current.style.height = "auto";
-    textarea.current.style.height = `${Math.min(textarea.current.scrollHeight, 160)}px`;
+    const node = textarea.current;
+    if (!node) return;
+    node.style.height = "auto";
+    node.style.height = `${Math.min(node.scrollHeight, 160)}px`;
   }, [controller.input]);
-
-  const send = () => {
-    const value = controller.input.trim();
-    if (!value || controller.disabled) return;
-    controller.send(value);
-    controller.setInput("");
+  const send = async () => {
+    if (!canSend || pending.current) return;
+    const draft = controller.input;
+    pending.current = true; setSubmitting(true); setSendError(null);
+    try {
+      const accepted = await controller.send(draft.trim());
+      if (accepted !== false && latestInput.current === draft) controller.setInput("");
+    } catch { setSendError("Message non envoyé. Ton brouillon est conservé."); }
+    finally { pending.current = false; setSubmitting(false); }
   };
-
-  const toggleVoice = () => {
-    const scope = window as typeof window & { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
-    const Ctor = scope.SpeechRecognition ?? scope.webkitSpeechRecognition;
-    if (!Ctor) return;
-    if (listening) { recognition.current?.stop(); return; }
-    const instance = new Ctor();
-    recognition.current = instance;
-    instance.lang = "fr-FR";
-    instance.continuous = false;
-    instance.interimResults = false;
-    instance.onresult = (event) => controller.setInput(`${controller.input}${controller.input ? " " : ""}${event.results[0]?.[0]?.transcript ?? ""}`);
-    instance.onend = () => setListening(false);
-    setListening(true);
-    instance.start();
-  };
-
-  return (
-    <div className="agent-chat__composer-wrap">
-      {(controller.queue?.length ?? 0) > 0 && <div className="agent-chat__queue">{controller.queue?.map((item) => <div key={item.id} className="agent-chat__queue-row">{editing === item.id ? <input autoFocus value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && draft.trim()) { controller.editQueued?.(item.id, draft.trim()); setEditing(null); } }} /> : <span title={item.text}>{item.text}</span>}<div>{controller.editQueued && <button type="button" onClick={() => { if (editing === item.id && draft.trim()) { controller.editQueued?.(item.id, draft.trim()); setEditing(null); } else { setEditing(item.id); setDraft(item.text); } }} aria-label="Modifier">{editing === item.id ? <Check size={13} /> : <Pencil size={13} />}</button>}{controller.sendQueued && <button type="button" onClick={() => controller.sendQueued?.(item.id)} aria-label="Envoyer maintenant"><ArrowUp size={13} /></button>}{controller.cancelQueued && <button type="button" onClick={() => controller.cancelQueued?.(item.id)} aria-label="Retirer"><X size={13} /></button>}</div></div>)}</div>}
-      <div className="agent-chat__composer">
-        <textarea ref={textarea} value={controller.input} onChange={(event) => controller.setInput(event.target.value)} placeholder={controller.disabled ? controller.disabledReason : placeholder} disabled={controller.disabled} rows={1} onKeyDown={(event) => { if (event.nativeEvent.isComposing) return; if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} />
-        <div className="agent-chat__composer-toolbar">
-          <div className="agent-chat__composer-leading">{slots?.composerLeading}{controller.models && controller.setModel && <select value={controller.selectedModel} onChange={(event) => controller.setModel?.(event.target.value)} aria-label="Modèle">{controller.models.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select>}{controller.efforts && controller.setEffort && <select value={controller.selectedEffort} onChange={(event) => controller.setEffort?.(event.target.value)} aria-label="Effort">{controller.efforts.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select>}</div>
-          <div className="agent-chat__composer-trailing">{slots?.composerTrailing}{controller.attach && <><input ref={fileInput} hidden type="file" multiple onChange={(event) => { controller.attach?.(Array.from(event.target.files ?? [])); event.target.value = ""; }} /><button type="button" onClick={() => fileInput.current?.click()} aria-label="Joindre"><Paperclip size={17} /></button></>}<button type="button" onClick={toggleVoice} className={listening ? "is-active" : ""} aria-label={listening ? "Arrêter la dictée" : "Dicter"}><Mic size={17} /></button>{controller.status === "streaming" && controller.stop && <button type="button" className="agent-chat__stop" onClick={controller.stop} aria-label="Arrêter"><Square size={13} fill="currentColor" /></button>}<button type="button" className="agent-chat__send" onClick={send} disabled={!canSend} aria-label={controller.status === "streaming" ? "Mettre en file" : "Envoyer"}><ArrowUp size={17} /></button></div>
+  return <div className="agent-chat__composer-wrap">
+    <div className="agent-chat__composer" data-disabled={controller.disabled || undefined}>
+      <ComposerQueue controller={controller} />{slots?.composerBefore}
+      <textarea ref={textarea} aria-label="Message à l’agent" value={controller.input} onChange={(event) => controller.setInput(event.target.value)} placeholder={controller.disabled ? controller.disabledReason ?? placeholder : placeholder} disabled={controller.disabled} rows={1} onKeyDown={(event) => {
+        if (event.nativeEvent.isComposing) return;
+        onKeyDown?.(event);
+        if (!event.defaultPrevented && event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); }
+      }} />
+      <div className="agent-chat__composer-toolbar">
+        <div className="agent-chat__composer-leading">{slots?.composerLeading}
+          {controller.attach && <><input ref={fileInput} hidden type="file" multiple onChange={(event) => { controller.attach?.(Array.from(event.target.files ?? [])); event.target.value = ""; }} /><button type="button" disabled={controller.disabled || controller.sendingDisabled} onClick={() => fileInput.current?.click()} aria-label="Joindre"><Paperclip size={15} /></button></>}
+          {controller.models && controller.setModel && controller.efforts && controller.setEffort && <ComposerSettingsPicker models={controller.models} selectedModel={controller.selectedModel} setModel={controller.setModel} efforts={controller.efforts} selectedEffort={controller.selectedEffort} setEffort={controller.setEffort} disabled={Boolean(controller.disabled)} menuSide={settingsMenuSide} />}
+        </div>
+        <div className="agent-chat__composer-trailing">{slots?.composerTrailing}
+          {slots?.voiceControl !== undefined ? slots.voiceControl : voice.supported && <button type="button" disabled={controller.disabled} onClick={voice.toggle} className={voice.listening ? "is-active" : ""} aria-pressed={voice.listening} aria-label={voice.listening ? "Arrêter la dictée" : "Dicter un message"}><Mic size={15} /></button>}
+          {controller.status === "streaming" && controller.stop && <button type="button" className="agent-chat__stop" onClick={controller.stop} aria-label="Interrompre la réponse"><Square size={13} fill="currentColor" /></button>}
+          <button type="button" className="agent-chat__send" onClick={() => void send()} disabled={!canSend} aria-busy={submitting || controller.status === "connecting"} aria-label={controller.status === "streaming" && controller.allowQueue ? "Mettre en file" : "Envoyer"}>{submitting || controller.status === "connecting" ? <LoaderCircle size={16} className="is-spinning" /> : <ArrowUp size={16} strokeWidth={2.5} />}</button>
         </div>
       </div>
     </div>
-  );
+    {(sendError || voice.error) && <p className="agent-chat__composer-error" role="alert">{sendError || voice.error}</p>}
+  </div>;
 }

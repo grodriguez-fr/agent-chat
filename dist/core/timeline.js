@@ -23,7 +23,8 @@ export function buildThreadBlocks(messages, streaming) {
     while (index < visible.length) {
         const message = visible[index];
         if (message.role !== "user") {
-            blocks.push({ type: "message", message });
+            if (message.parts.length)
+                blocks.push({ type: "message", message });
             index += 1;
             continue;
         }
@@ -32,23 +33,27 @@ export function buildThreadBlocks(messages, streaming) {
         let end = start;
         while (end < visible.length && visible[end].role !== "user")
             end += 1;
-        const turn = visible.slice(start, end);
+        const rawTurn = visible.slice(start, end);
+        const turn = rawTurn.filter((entry) => entry.parts.length);
         const live = streaming && end === visible.length;
         let finalMessage;
         let activity = turn;
         if (!live) {
             const candidate = [...turn].reverse().find((entry) => entry.role === "assistant" && messageText(entry).trim());
             if (candidate) {
-                const finalParts = candidate.parts.filter((part) => part.type === "text" || part.type === "attachment" || part.type === "slot");
-                const activityParts = candidate.parts.filter((part) => part.type === "tool" || part.type === "reasoning");
-                finalMessage = { ...candidate, parts: finalParts };
-                activity = turn.filter((entry) => entry !== candidate);
-                if (activityParts.length)
-                    activity = [...activity, { ...candidate, id: `${candidate.id}-activity`, parts: activityParts }];
+                let lastActivity = -1;
+                candidate.parts.forEach((part, position) => { if (part.type === "tool" || part.type === "reasoning")
+                    lastActivity = position; });
+                const finalParts = candidate.parts.slice(lastActivity + 1);
+                const activityParts = candidate.parts.slice(0, lastActivity + 1);
+                if (finalParts.length) {
+                    finalMessage = { ...candidate, parts: finalParts };
+                    activity = turn.flatMap((entry) => entry !== candidate ? [entry] : activityParts.length ? [{ ...candidate, sourceId: candidate.id, id: `${candidate.id}-activity`, parts: activityParts }] : []);
+                }
             }
         }
         const endedAt = [...turn].reverse().find((entry) => entry.endedAt || entry.createdAt)?.endedAt ?? [...turn].reverse().find((entry) => entry.createdAt)?.createdAt;
-        const durationMs = message.createdAt && endedAt && endedAt >= message.createdAt ? endedAt - message.createdAt : null;
+        const durationMs = rawTurn.find((entry) => entry.durationMs != null)?.durationMs ?? (message.createdAt != null && endedAt != null && endedAt >= message.createdAt ? endedAt - message.createdAt : null);
         if (activity.length || finalMessage || live)
             blocks.push({ type: "execution", id: `execution-${message.id}`, messages: activity, finalMessage, live, durationMs });
         index = end;

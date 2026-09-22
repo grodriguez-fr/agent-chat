@@ -54,6 +54,9 @@ export type AgentMessage = {
     createdAt?: number;
     endedAt?: number;
     queued?: boolean;
+    durationMs?: number;
+    /** Original message identity when its activity and final answer are split. */
+    sourceId?: string;
 };
 export type ConversationSummary = {
     id: string;
@@ -67,6 +70,8 @@ export type ComposerOption = {
     id: string;
     label: string;
     description?: string;
+    shortLabel?: string;
+    provider?: string;
 };
 export type QueuedPrompt = {
     id: string;
@@ -77,7 +82,11 @@ export type AgentChatController = {
     messages: AgentMessage[];
     input: string;
     setInput: (value: string) => void;
-    send: (value: string) => void;
+    send: (value: string) => void | boolean | Promise<void | boolean>;
+    /** Enable sending during a turn only when the consumer implements a queue. */
+    allowQueue?: boolean;
+    hasAttachments?: boolean;
+    sendingDisabled?: boolean;
     stop?: () => void;
     error?: string | null;
     streamStartedAt?: number | null;
@@ -112,6 +121,9 @@ export type AgentChatSlots = {
     emptyAfter?: ReactNode;
     composerLeading?: ReactNode;
     composerTrailing?: ReactNode;
+    composerBefore?: ReactNode;
+    voiceControl?: ReactNode;
+    renderActivity?: (messages: AgentMessage[], live: boolean) => ReactNode;
     afterMessages?: ReactNode;
     renderMarkdown?: (markdown: string, streaming: boolean) => ReactNode;
     renderToolDetail?: (tool: AgentToolActivity) => ReactNode;
