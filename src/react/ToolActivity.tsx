@@ -29,6 +29,7 @@ function shortTarget(tool: AgentToolActivity) {
   return description && description.length <= 100 ? description : undefined;
 }
 
+/** One tool call as a flat row (ChatGPT style): no card, detail unfolds inline. */
 export function ToolRow({ tool, slots }: { tool: AgentToolActivity; slots?: AgentChatSlots }) {
   const [open, setOpen] = useState(false);
   const action = toolAction(tool);
@@ -37,37 +38,46 @@ export function ToolRow({ tool, slots }: { tool: AgentToolActivity; slots?: Agen
   const details = slots?.renderToolDetail?.(tool);
   const hasDetail = Boolean(details || tool.detail || tool.command || tool.output || tool.path || tool.diffs?.length);
   const label = tool.status === "running" || tool.status === "pending" ? action.ongoing : action.done;
+  const target = shortTarget(tool);
   return <div className={`agent-chat__activity-item agent-chat__activity-item--${tool.status}`}>
-    <div className="agent-chat__activity-item-icon"><Icon size={15} aria-hidden /></div>
-    <div className="agent-chat__activity-item-main">
-      <div className="agent-chat__activity-item-head"><span>{label}</span><small><Status size={12} className={tool.status === "running" ? "is-spinning" : ""} aria-hidden />{states[tool.status]}</small></div>
-      {shortTarget(tool) && <span className="agent-chat__activity-item-target" title={tool.path ?? tool.detail}>{shortTarget(tool)}</span>}
-      {hasDetail && <button type="button" className="agent-chat__activity-item-more" onClick={() => setOpen(!open)} aria-expanded={open}>
-        {open ? "Masquer les détails" : "Voir les détails"}{open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-      </button>}
-      {open && <div className="agent-chat__activity-item-detail">{details ?? <>
-        <span className="agent-chat__activity-item-raw">{tool.title}</span>
-        {tool.detail && <p>{tool.detail}</p>}{tool.path && <p>{tool.path}</p>}
-        {tool.command && <pre><code>{tool.command}</code></pre>}{tool.output && <pre><code>{tool.output}</code></pre>}
-        {tool.diffs?.map((diff, index) => <details key={`${diff.path}-${index}`} className="agent-chat__diff">
-          <summary>{diff.path}<span>+{diff.added ?? 0} −{diff.removed ?? 0}</span></summary>
-          {diff.oldText && <pre className="agent-chat__diff-old"><code>{diff.oldText}</code></pre>}
-          {diff.newText && <pre className="agent-chat__diff-new"><code>{diff.newText}</code></pre>}
-        </details>)}
-      </>}</div>}
-    </div>
+    <button type="button" className="agent-chat__activity-item-head" onClick={() => { if (hasDetail) setOpen(!open); }} aria-expanded={hasDetail ? open : undefined} aria-label={`${label}${target ? ` — ${target}` : ""}`} title={states[tool.status]} disabled={!hasDetail}>
+      <span className="agent-chat__activity-item-chevron" aria-hidden>{hasDetail && (open ? <ChevronDown size={13} /> : <ChevronRight size={13} />)}</span>
+      <span className="agent-chat__activity-item-icon"><Icon size={14} aria-hidden /></span>
+      <span className="agent-chat__activity-item-label">{label}</span>
+      {target && <span className="agent-chat__activity-item-target" title={tool.path ?? tool.detail ?? undefined}>{target}</span>}
+      <span className="agent-chat__activity-item-status"><Status size={12} className={tool.status === "running" ? "is-spinning" : ""} aria-hidden />{tool.status !== "completed" && <span>{states[tool.status]}</span>}</span>
+    </button>
+    {open && hasDetail && <div className="agent-chat__activity-item-detail">{details ?? <>
+      <span className="agent-chat__activity-item-raw">{tool.title}</span>
+      {tool.detail && <p>{tool.detail}</p>}{tool.path && <p>{tool.path}</p>}
+      {tool.command && <pre><code>{tool.command}</code></pre>}{tool.output && <pre><code>{tool.output}</code></pre>}
+      {tool.diffs?.map((diff, index) => <details key={`${diff.path}-${index}`} className="agent-chat__diff">
+        <summary>{diff.path}<span>+{diff.added ?? 0} −{diff.removed ?? 0}</span></summary>
+        {diff.oldText && <pre className="agent-chat__diff-old"><code>{diff.oldText}</code></pre>}
+        {diff.newText && <pre className="agent-chat__diff-new"><code>{diff.newText}</code></pre>}
+      </details>)}
+    </>}</div>}
   </div>;
 }
 
+function groupLabel(tools: AgentToolActivity[], live: boolean): string {
+  if (live) {
+    const running = [...tools].reverse().find((tool) => tool.status === "running" || tool.status === "pending");
+    return running ? `${toolAction(running).ongoing}…` : "Réfléchit à la demande…";
+  }
+  if (tools.length === 0) return "A réfléchi à la demande";
+  if (tools.length === 1) return toolAction(tools[0]).done;
+  return `${toolAction(tools[tools.length - 1]).done} · ${tools.length} outils`;
+}
+
+/** Consecutive tool/reasoning activity folded into one collapsible group. */
 export function ToolActivity({ parts, slots, live = false }: { parts: AgentMessagePart[]; slots?: AgentChatSlots; live?: boolean }) {
   const [open, setOpen] = useState(false);
   const tools = parts.flatMap((part) => part.type === "tool" ? [part.tool] : []);
-  const running = [...tools].reverse().find((tool) => tool.status === "running" || tool.status === "pending");
-  const label = live ? running ? `${toolAction(running).ongoing}…` : "Réfléchit à la demande…" : tools.length > 1 ? "A vérifié les informations utiles" : tools.length ? toolAction(tools[0]).done : "A réfléchi à la demande";
   return <div className="agent-chat__activity">
     <button type="button" className="agent-chat__activity-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
       {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-      <Brain size={14} aria-hidden /><span className={live ? "agent-chat__activity-live" : undefined}>{label}</span>
+      <Brain size={14} aria-hidden /><span className={live ? "agent-chat__activity-live" : undefined}>{groupLabel(tools, live)}</span>
     </button>
     {open && <div className="agent-chat__activity-details">{parts.map((part, index) => part.type === "tool"
       ? <ToolRow key={part.tool.id} tool={part.tool} slots={slots} />
@@ -75,14 +85,43 @@ export function ToolActivity({ parts, slots, live = false }: { parts: AgentMessa
   </div>;
 }
 
+function isActivityOnly(message: AgentMessage): boolean {
+  if (!message.parts.length) return false;
+  return message.parts.every((part) => part.type === "tool" || part.type === "reasoning");
+}
+
+function messageCommentary(message: AgentMessage): string {
+  return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
+}
+
 /** Default execution activity shared by page and panel consumers. */
 export function ActivityFeed({ messages, live, slots }: { messages: AgentMessage[]; live: boolean; slots?: AgentChatSlots }) {
-  return <>{messages.map((message, index) => {
+  const blocks: Array<{ key: string; parts: AgentMessagePart[]; live: boolean } | { key: string; commentary: string }> = [];
+  let pending: AgentMessagePart[] = [];
+  let pendingKey = "";
+  let pendingLive = false;
+  const flush = () => {
+    if (!pending.length) return;
+    blocks.push({ key: `activity-${pendingKey}`, parts: pending, live: pendingLive });
+    pending = [];
+    pendingLive = false;
+  };
+  messages.forEach((message, index) => {
+    const isLast = index === messages.length - 1;
+    const commentary = messageCommentary(message);
+    if (isActivityOnly(message) && !commentary) {
+      if (!pending.length) pendingKey = message.id;
+      pending.push(...message.parts);
+      if (live && isLast) pendingLive = true;
+      return;
+    }
+    flush();
     const activity = message.parts.filter((part) => part.type === "tool" || part.type === "reasoning");
-    const commentary = message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
-    return <div key={message.id}>
-      {activity.length > 0 && <ToolActivity parts={activity} slots={slots} live={live && index === messages.length - 1} />}
-      {commentary && <div className="agent-chat__activity-commentary">{slots?.renderMarkdown?.(commentary, false) ?? <AgentMarkdown>{commentary}</AgentMarkdown>}</div>}
-    </div>;
-  })}</>;
+    if (activity.length > 0) blocks.push({ key: `activity-${message.id}`, parts: activity, live: live && isLast });
+    if (commentary) blocks.push({ key: `commentary-${message.id}`, commentary });
+  });
+  flush();
+  return <>{blocks.map((block) => "commentary" in block
+    ? <div key={block.key} className="agent-chat__activity-commentary">{slots?.renderMarkdown?.(block.commentary, false) ?? <AgentMarkdown>{block.commentary}</AgentMarkdown>}</div>
+    : <ToolActivity key={block.key} parts={block.parts} slots={slots} live={block.live} />)}</>;
 }

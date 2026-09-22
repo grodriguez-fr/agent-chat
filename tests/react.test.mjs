@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AgentChatShell, AgentComposer, AgentTimeline } from "../dist/react/index.js";
-import { toolAction } from "../dist/react/ToolActivity.js";
+import { toolAction, ActivityFeed, ToolRow } from "../dist/react/ToolActivity.js";
 
 const controller = {
   status: "ready",
@@ -77,6 +77,41 @@ test("user text is plain and final answer is visible without opening tools", () 
   assert.match(html, /aria-expanded="false"/);
 });
 
+test("consecutive tool calls fold into one flat group", () => {
+  const tools = (ids) => ids.map((id) => ({
+    id: `m-${id}`,
+    role: "tool",
+    parts: [{ type: "tool", tool: { id, title: "read", status: "completed", path: `/root/apps/a/${id}.ts` } }],
+  }));
+  const grouped = renderToStaticMarkup(React.createElement(ActivityFeed, { messages: tools(["t1", "t2", "t3"]), live: false }));
+  assert.equal(grouped.match(/agent-chat__activity-toggle/g)?.length, 1);
+  assert.match(grouped, /3 outils/);
+  assert.doesNotMatch(grouped, /Voir les détails/);
+});
+
+test("tool rows are flat with inline detail", () => {
+  const row = renderToStaticMarkup(React.createElement(ToolRow, {
+    tool: { id: "t", title: "execute", status: "completed", command: "ls /root" },
+  }));
+  assert.match(row, /agent-chat__activity-item-head/);
+  assert.doesNotMatch(row, /agent-chat__activity-item-more/);
+  assert.doesNotMatch(row, /ls \/root/);
+});
+
+test("commentary between tools splits activity groups", () => {
+  const tool = (id) => ({
+    id: `m-${id}`,
+    role: "tool",
+    parts: [{ type: "tool", tool: { id, title: "read", status: "completed", path: `/root/apps/a/${id}.ts` } }],
+  });
+  const html = renderToStaticMarkup(React.createElement(ActivityFeed, { live: false, messages: [
+    tool("t1"),
+    { id: "mid", role: "assistant", parts: [{ type: "text", text: "Voilà une étape" }] },
+    tool("t2"),
+  ] }));
+  assert.equal(html.match(/agent-chat__activity-toggle/g)?.length, 2);
+  assert.match(html, /Voilà une étape/);
+});
 test("shared activity hides raw tool identifiers behind natural summaries", () => {
   assert.equal(toolAction({ id: "1", title: "mcp__jobfinder__list_offres", status: "running" }).ongoing, "Consulte les offres");
   assert.equal(toolAction({ id: "2", title: "grep", status: "completed" }).done, "Recherche terminée");

@@ -210,19 +210,20 @@ button.agent-chat__execution-header { cursor: pointer; }
 .agent-chat__activity-toggle:hover, .agent-chat__tool > button:hover:enabled { background: var(--agent-surface); }
 .agent-chat__activity-toggle span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .agent-chat__activity-live { background: linear-gradient(100deg, var(--agent-muted) 10%, var(--agent-text) 45%, var(--agent-muted) 80%); background-size: 250% 100%; background-clip: text; -webkit-background-clip: text; color: transparent; animation: agent-chat-reasoning-sweep 2.4s linear infinite; }
-.agent-chat__activity-details { display: grid; gap: .5rem; margin: .4rem 0 .5rem 1.1rem; padding-left: .7rem; border-left: 1px solid var(--agent-border); }
-.agent-chat__activity-item { display: flex; min-width: 0; gap: .65rem; padding: .65rem .75rem; border: 1px solid var(--agent-border); border-radius: .75rem; background: color-mix(in srgb, var(--agent-surface-raised) 80%, var(--agent-surface)); box-shadow: 0 1px 3px rgb(0 0 0 / .035); }
-.agent-chat__activity-item-icon { display: grid; width: 1.8rem; height: 1.8rem; flex: 0 0 auto; place-items: center; border-radius: .55rem; background: var(--agent-surface); color: var(--agent-muted); }
+.agent-chat__activity-details { display: grid; margin: .35rem 0 .5rem .85rem; padding-left: .65rem; border-left: 1px solid var(--agent-border); }
+.agent-chat__activity-item { min-width: 0; }
+.agent-chat__activity-item-head { display: flex; width: 100%; align-items: center; gap: .45rem; min-width: 0; border: 0; border-radius: .45rem; padding: .3rem .35rem; background: transparent; color: var(--agent-text); cursor: pointer; font-size: .78rem; line-height: 1.3rem; text-align: left; }
+button.agent-chat__activity-item-head:hover { background: var(--agent-surface); }
+.agent-chat__activity-item-head:disabled { cursor: default; }
+.agent-chat__activity-item-head:disabled:hover { background: transparent; }
+.agent-chat__activity-item-chevron { display: inline-flex; flex: 0 0 auto; width: .85rem; color: var(--agent-muted); }
+.agent-chat__activity-item-icon { display: inline-flex; flex: 0 0 auto; color: var(--agent-muted); }
 .agent-chat__activity-item--running .agent-chat__activity-item-icon { color: var(--agent-accent); }
 .agent-chat__activity-item--failed .agent-chat__activity-item-icon { color: var(--agent-danger); }
-.agent-chat__activity-item-main { min-width: 0; flex: 1; }
-.agent-chat__activity-item-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; line-height: 1.25rem; }
-.agent-chat__activity-item-head > span { min-width: 0; font-size: .77rem; font-weight: 600; }
-.agent-chat__activity-item-head small { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .2rem; color: var(--agent-muted); font-size: .66rem; }
-.agent-chat__activity-item-target { display: block; overflow: hidden; margin-top: .1rem; color: var(--agent-muted); font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
-.agent-chat__activity-item-more { display: inline-flex; align-items: center; gap: .2rem; margin-top: .25rem; padding: 0; border: 0; background: transparent; color: var(--agent-muted); cursor: pointer; font-size: .68rem; }
-.agent-chat__activity-item-more:hover { color: var(--agent-text); }
-.agent-chat__activity-item-detail { min-width: 0; margin-top: .55rem; padding-top: .5rem; border-top: 1px solid var(--agent-border); color: var(--agent-muted); font-size: .72rem; overflow-wrap: anywhere; }
+.agent-chat__activity-item-label { min-width: 0; overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.agent-chat__activity-item-target { min-width: 0; overflow: hidden; color: var(--agent-muted); font-family: ui-monospace, monospace; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.agent-chat__activity-item-status { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .25rem; margin-left: auto; color: var(--agent-muted); font-size: .68rem; }
+.agent-chat__activity-item-detail { min-width: 0; margin: .1rem 0 .3rem 1.9rem; color: var(--agent-muted); font-size: .74rem; overflow-wrap: anywhere; }
 .agent-chat__activity-item-detail p { margin: .3rem 0; }
 .agent-chat__activity-item-detail pre { max-height: 12rem; overflow: auto; margin: .35rem 0; border-radius: .5rem; padding: .6rem; background: #111113; color: #e4e4e7; white-space: pre-wrap; }
 .agent-chat__activity-item-raw { display: block; opacity: .7; font-family: ui-monospace, monospace; font-size: .65rem; }

@@ -35,6 +35,7 @@ function shortTarget(tool) {
     const description = tool.detail?.replace(/\s+/g, " ").trim();
     return description && description.length <= 100 ? description : undefined;
 }
+/** One tool call as a flat row (ChatGPT style): no card, detail unfolds inline. */
 export function ToolRow({ tool, slots }) {
     const [open, setOpen] = useState(false);
     const action = toolAction(tool);
@@ -43,23 +44,71 @@ export function ToolRow({ tool, slots }) {
     const details = slots?.renderToolDetail?.(tool);
     const hasDetail = Boolean(details || tool.detail || tool.command || tool.output || tool.path || tool.diffs?.length);
     const label = tool.status === "running" || tool.status === "pending" ? action.ongoing : action.done;
-    return _jsxs("div", { className: `agent-chat__activity-item agent-chat__activity-item--${tool.status}`, children: [_jsx("div", { className: "agent-chat__activity-item-icon", children: _jsx(Icon, { size: 15, "aria-hidden": true }) }), _jsxs("div", { className: "agent-chat__activity-item-main", children: [_jsxs("div", { className: "agent-chat__activity-item-head", children: [_jsx("span", { children: label }), _jsxs("small", { children: [_jsx(Status, { size: 12, className: tool.status === "running" ? "is-spinning" : "", "aria-hidden": true }), states[tool.status]] })] }), shortTarget(tool) && _jsx("span", { className: "agent-chat__activity-item-target", title: tool.path ?? tool.detail, children: shortTarget(tool) }), hasDetail && _jsxs("button", { type: "button", className: "agent-chat__activity-item-more", onClick: () => setOpen(!open), "aria-expanded": open, children: [open ? "Masquer les détails" : "Voir les détails", open ? _jsx(ChevronDown, { size: 12 }) : _jsx(ChevronRight, { size: 12 })] }), open && _jsx("div", { className: "agent-chat__activity-item-detail", children: details ?? _jsxs(_Fragment, { children: [_jsx("span", { className: "agent-chat__activity-item-raw", children: tool.title }), tool.detail && _jsx("p", { children: tool.detail }), tool.path && _jsx("p", { children: tool.path }), tool.command && _jsx("pre", { children: _jsx("code", { children: tool.command }) }), tool.output && _jsx("pre", { children: _jsx("code", { children: tool.output }) }), tool.diffs?.map((diff, index) => _jsxs("details", { className: "agent-chat__diff", children: [_jsxs("summary", { children: [diff.path, _jsxs("span", { children: ["+", diff.added ?? 0, " \u2212", diff.removed ?? 0] })] }), diff.oldText && _jsx("pre", { className: "agent-chat__diff-old", children: _jsx("code", { children: diff.oldText }) }), diff.newText && _jsx("pre", { className: "agent-chat__diff-new", children: _jsx("code", { children: diff.newText }) })] }, `${diff.path}-${index}`))] }) })] })] });
+    const target = shortTarget(tool);
+    return _jsxs("div", { className: `agent-chat__activity-item agent-chat__activity-item--${tool.status}`, children: [_jsxs("button", { type: "button", className: "agent-chat__activity-item-head", onClick: () => { if (hasDetail)
+                    setOpen(!open); }, "aria-expanded": hasDetail ? open : undefined, "aria-label": `${label}${target ? ` — ${target}` : ""}`, title: states[tool.status], disabled: !hasDetail, children: [_jsx("span", { className: "agent-chat__activity-item-chevron", "aria-hidden": true, children: hasDetail && (open ? _jsx(ChevronDown, { size: 13 }) : _jsx(ChevronRight, { size: 13 })) }), _jsx("span", { className: "agent-chat__activity-item-icon", children: _jsx(Icon, { size: 14, "aria-hidden": true }) }), _jsx("span", { className: "agent-chat__activity-item-label", children: label }), target && _jsx("span", { className: "agent-chat__activity-item-target", title: tool.path ?? tool.detail ?? undefined, children: target }), _jsxs("span", { className: "agent-chat__activity-item-status", children: [_jsx(Status, { size: 12, className: tool.status === "running" ? "is-spinning" : "", "aria-hidden": true }), tool.status !== "completed" && _jsx("span", { children: states[tool.status] })] })] }), open && hasDetail && _jsx("div", { className: "agent-chat__activity-item-detail", children: details ?? _jsxs(_Fragment, { children: [_jsx("span", { className: "agent-chat__activity-item-raw", children: tool.title }), tool.detail && _jsx("p", { children: tool.detail }), tool.path && _jsx("p", { children: tool.path }), tool.command && _jsx("pre", { children: _jsx("code", { children: tool.command }) }), tool.output && _jsx("pre", { children: _jsx("code", { children: tool.output }) }), tool.diffs?.map((diff, index) => _jsxs("details", { className: "agent-chat__diff", children: [_jsxs("summary", { children: [diff.path, _jsxs("span", { children: ["+", diff.added ?? 0, " \u2212", diff.removed ?? 0] })] }), diff.oldText && _jsx("pre", { className: "agent-chat__diff-old", children: _jsx("code", { children: diff.oldText }) }), diff.newText && _jsx("pre", { className: "agent-chat__diff-new", children: _jsx("code", { children: diff.newText }) })] }, `${diff.path}-${index}`))] }) })] });
 }
+function groupLabel(tools, live) {
+    if (live) {
+        const running = [...tools].reverse().find((tool) => tool.status === "running" || tool.status === "pending");
+        return running ? `${toolAction(running).ongoing}…` : "Réfléchit à la demande…";
+    }
+    if (tools.length === 0)
+        return "A réfléchi à la demande";
+    if (tools.length === 1)
+        return toolAction(tools[0]).done;
+    return `${toolAction(tools[tools.length - 1]).done} · ${tools.length} outils`;
+}
+/** Consecutive tool/reasoning activity folded into one collapsible group. */
 export function ToolActivity({ parts, slots, live = false }) {
     const [open, setOpen] = useState(false);
     const tools = parts.flatMap((part) => part.type === "tool" ? [part.tool] : []);
-    const running = [...tools].reverse().find((tool) => tool.status === "running" || tool.status === "pending");
-    const label = live ? running ? `${toolAction(running).ongoing}…` : "Réfléchit à la demande…" : tools.length > 1 ? "A vérifié les informations utiles" : tools.length ? toolAction(tools[0]).done : "A réfléchi à la demande";
-    return _jsxs("div", { className: "agent-chat__activity", children: [_jsxs("button", { type: "button", className: "agent-chat__activity-toggle", onClick: () => setOpen(!open), "aria-expanded": open, children: [open ? _jsx(ChevronDown, { size: 14 }) : _jsx(ChevronRight, { size: 14 }), _jsx(Brain, { size: 14, "aria-hidden": true }), _jsx("span", { className: live ? "agent-chat__activity-live" : undefined, children: label })] }), open && _jsx("div", { className: "agent-chat__activity-details", children: parts.map((part, index) => part.type === "tool"
+    return _jsxs("div", { className: "agent-chat__activity", children: [_jsxs("button", { type: "button", className: "agent-chat__activity-toggle", onClick: () => setOpen(!open), "aria-expanded": open, children: [open ? _jsx(ChevronDown, { size: 14 }) : _jsx(ChevronRight, { size: 14 }), _jsx(Brain, { size: 14, "aria-hidden": true }), _jsx("span", { className: live ? "agent-chat__activity-live" : undefined, children: groupLabel(tools, live) })] }), open && _jsx("div", { className: "agent-chat__activity-details", children: parts.map((part, index) => part.type === "tool"
                     ? _jsx(ToolRow, { tool: part.tool, slots: slots }, part.tool.id)
                     : part.type === "reasoning" && _jsx("div", { className: "agent-chat__reasoning", children: slots?.renderMarkdown?.(part.text, Boolean(part.streaming)) ?? _jsx(AgentMarkdown, { streaming: part.streaming, children: part.text }) }, index)) })] });
 }
+function isActivityOnly(message) {
+    if (!message.parts.length)
+        return false;
+    return message.parts.every((part) => part.type === "tool" || part.type === "reasoning");
+}
+function messageCommentary(message) {
+    return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
+}
 /** Default execution activity shared by page and panel consumers. */
 export function ActivityFeed({ messages, live, slots }) {
-    return _jsx(_Fragment, { children: messages.map((message, index) => {
-            const activity = message.parts.filter((part) => part.type === "tool" || part.type === "reasoning");
-            const commentary = message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
-            return _jsxs("div", { children: [activity.length > 0 && _jsx(ToolActivity, { parts: activity, slots: slots, live: live && index === messages.length - 1 }), commentary && _jsx("div", { className: "agent-chat__activity-commentary", children: slots?.renderMarkdown?.(commentary, false) ?? _jsx(AgentMarkdown, { children: commentary }) })] }, message.id);
-        }) });
+    const blocks = [];
+    let pending = [];
+    let pendingKey = "";
+    let pendingLive = false;
+    const flush = () => {
+        if (!pending.length)
+            return;
+        blocks.push({ key: `activity-${pendingKey}`, parts: pending, live: pendingLive });
+        pending = [];
+        pendingLive = false;
+    };
+    messages.forEach((message, index) => {
+        const isLast = index === messages.length - 1;
+        const commentary = messageCommentary(message);
+        if (isActivityOnly(message) && !commentary) {
+            if (!pending.length)
+                pendingKey = message.id;
+            pending.push(...message.parts);
+            if (live && isLast)
+                pendingLive = true;
+            return;
+        }
+        flush();
+        const activity = message.parts.filter((part) => part.type === "tool" || part.type === "reasoning");
+        if (activity.length > 0)
+            blocks.push({ key: `activity-${message.id}`, parts: activity, live: live && isLast });
+        if (commentary)
+            blocks.push({ key: `commentary-${message.id}`, commentary });
+    });
+    flush();
+    return _jsx(_Fragment, { children: blocks.map((block) => "commentary" in block
+            ? _jsx("div", { className: "agent-chat__activity-commentary", children: slots?.renderMarkdown?.(block.commentary, false) ?? _jsx(AgentMarkdown, { children: block.commentary }) }, block.key)
+            : _jsx(ToolActivity, { parts: block.parts, slots: slots, live: block.live }, block.key)) });
 }
 //# sourceMappingURL=ToolActivity.js.map

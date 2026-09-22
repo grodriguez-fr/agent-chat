@@ -7,10 +7,12 @@ type Action = {
 };
 /** Common tool labels live in the package so each application gets the same presentation. */
 export declare function toolAction(tool: AgentToolActivity): Action;
+/** One tool call as a flat row (ChatGPT style): no card, detail unfolds inline. */
 export declare function ToolRow({ tool, slots }: {
     tool: AgentToolActivity;
     slots?: AgentChatSlots;
 }): import("react").JSX.Element;
+/** Consecutive tool/reasoning activity folded into one collapsible group. */
 export declare function ToolActivity({ parts, slots, live }: {
     parts: AgentMessagePart[];
     slots?: AgentChatSlots;
