@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, RotateCcw, Zap } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import type { ComposerOption } from "../core/index.js";
 
 type Props = {
@@ -125,7 +125,7 @@ export function ComposerSettingsPicker({ models, selectedModel, setModel, effort
           <ChevronRight size={16} />
         </button>
         <div className="agent-chat__settings-effort-panel">
-          <div className="agent-chat__settings-effort-heading"><Zap size={15} /><span><strong>{currentEffort.label}</strong><ChevronRight size={13} /></span><button type="button" aria-label="Réinitialiser l'effort" onClick={() => setEffort(efforts[Math.floor((efforts.length - 1) / 2)]?.id ?? currentEffort.id)}><RotateCcw size={14} /></button></div>
+          <div className="agent-chat__settings-effort-heading"><span><strong>{currentEffort.label}</strong><ChevronRight size={13} /></span><button type="button" aria-label="Réinitialiser l'effort" onClick={() => setEffort(efforts[Math.floor((efforts.length - 1) / 2)]?.id ?? currentEffort.id)}><RotateCcw size={14} /></button></div>
           <div className="agent-chat__settings-effort-model">{shortLabel(currentModel)}</div>
           <input aria-label="Niveau d'effort" type="range" min="0" max={efforts.length - 1} step="1" value={effortIndex} onChange={(event) => setEffort(efforts[Number(event.currentTarget.value)]?.id ?? currentEffort.id)} style={{ background: "linear-gradient(to right, var(--agent-accent) " + effortProgress + "%, color-mix(in srgb, var(--agent-text) 16%, transparent) " + effortProgress + "%)" }} />
         </div>
