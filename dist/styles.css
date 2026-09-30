@@ -30,7 +30,10 @@
 }
 .agent-chat, .agent-chat * { box-sizing: border-box; }
 :where(.agent-chat) button, :where(.agent-chat) input, :where(.agent-chat) textarea, :where(.agent-chat) select { font: inherit; }
-:where(.agent-chat) button { color: inherit; }
+/* Defaults must yield to product renderer styles, including layered utilities. */
+@layer base {
+  :where(.agent-chat) button { color: inherit; }
+}
 .agent-chat--page { display: flex; width: 100%; height: 100%; min-height: 0; overflow: hidden; background: var(--agent-background); }
 .agent-chat--panel { position: fixed; inset: 0 0 0 auto; z-index: 50; display: flex; width: min(var(--agent-panel-width), 100vw); background: var(--agent-background); border-left: 1px solid var(--agent-border); box-shadow: 0 20px 60px rgb(0 0 0 / .2); }
 .agent-chat__sidebar { width: var(--agent-sidebar-width); flex: 0 0 auto; border-right: 1px solid var(--agent-border); background: color-mix(in srgb, var(--agent-surface) 74%, transparent); overflow: hidden; }
@@ -73,7 +76,9 @@
 .agent-chat__markdown code:not(pre code) { border-radius: .3rem; padding: .1rem .3rem; background: var(--agent-surface); font: .84em ui-monospace, monospace; }
 .agent-chat__markdown table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: .8rem; }
 .agent-chat__markdown th, .agent-chat__markdown td { border-bottom: 1px solid var(--agent-border); padding: .4rem .55rem; text-align: left; }
-.agent-chat__markdown a { color: var(--agent-accent); }
+@layer base {
+  .agent-chat__markdown a { color: var(--agent-accent); }
+}
 .agent-chat__markdown--streaming { animation: agent-chat-wave 1.1s ease-out; }
 @keyframes agent-chat-wave { from { color: var(--agent-muted); opacity: .72; } to { color: inherit; opacity: 1; } }
 .agent-chat__markdown--streaming > * {

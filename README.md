@@ -107,3 +107,10 @@ Messages keep their plain text (`@offre:12`); resolving and validating the
 entity stays in the consumer. `findTriggerMatch`, `applySuggestion` and
 `splitInlineTokens` are exported from `core` for editors outside the composer.
 `AgentChatShell` also forwards `onComposerKeyDown` to the composer.
+
+## Renderer styling
+
+Generic button and Markdown link colors live in the CSS `base` layer so
+product renderers can override them with normal styles or Tailwind utilities.
+Component-specific chat controls keep their existing styles. No `!important`
+is needed for custom entity links.
