@@ -30,14 +30,17 @@ jobs:
             base: master
             directory: web-app
             manager: pnpm
+            lockfile: pnpm-lock.yaml
           - repository: job-finder
             base: main
             directory: .
             manager: npm
+            lockfile: package-lock.json
           - repository: talos
             base: main
             directory: .
             manager: npm-legacy
+            lockfile: package-lock.json
     env:
       UPDATE_TOKEN: ${{ secrets.AGENT_UPDATE_TOKEN }}
       RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
@@ -93,6 +96,5 @@ jobs:
             Review the release notes and the application's CI before merging. This PR has no automatic merge and does not update the shared gateway. Deployment follows the application's existing process after merge.
           add-paths: |
             ${{ matrix.directory }}/package.json
-            ${{ matrix.directory }}/package-lock.json
-            ${{ matrix.directory }}/pnpm-lock.yaml
+            ${{ matrix.directory }}/${{ matrix.lockfile }}
             ${{ matrix.directory }}/vendor/agent-chat-*.tgz
