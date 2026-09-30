@@ -1,0 +1,98 @@
+name: Propose agent-chat updates
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published stable release tag (for example v0.3.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-chat-update-proposals
+  cancel-in-progress: false
+
+jobs:
+  propose:
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !github.event.release.draft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: organisation
+            base: master
+            directory: web-app
+            manager: pnpm
+          - repository: job-finder
+            base: main
+            directory: .
+            manager: npm
+          - repository: talos
+            base: main
+            directory: .
+            manager: npm-legacy
+    env:
+      UPDATE_TOKEN: ${{ secrets.AGENT_UPDATE_TOKEN }}
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - name: Check bot configuration
+        run: |
+          if [ -z "$UPDATE_TOKEN" ]; then
+            echo '::error::Configure AGENT_UPDATE_TOKEN as described in docs/consumer-updates.md.'
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          path: shared
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: grodriguez-fr/${{ matrix.repository }}
+          ref: ${{ matrix.base }}
+          token: ${{ secrets.AGENT_UPDATE_TOKEN }}
+          path: application
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        if: matrix.manager == 'pnpm'
+        with:
+          version: 11.11.0
+          run_install: false
+      - name: Download the published archive and prepare the update
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_DIRECTORY: application/${{ matrix.directory }}
+          PACKAGE_MANAGER: ${{ matrix.manager }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a stable vX.Y.Z tag'; exit 1; }
+          version="${RELEASE_TAG#v}"
+          mkdir release
+          gh release download "$RELEASE_TAG" --repo grodriguez-fr/agent-chat --pattern "agent-chat-$version.tgz" --dir release
+          node shared/scripts/update-consumer.mjs "$APP_DIRECTORY" "release/agent-chat-$version.tgz" "$version" "$PACKAGE_MANAGER"
+      - name: Open or refresh the application's update PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          path: application
+          token: ${{ secrets.AGENT_UPDATE_TOKEN }}
+          base: ${{ matrix.base }}
+          branch: codex/update-agent-chat
+          commit-message: Update agent-chat to ${{ env.RELEASE_TAG }}
+          title: Update agent-chat to ${{ env.RELEASE_TAG }}
+          body: |
+            Adopt the exact archive from [agent-chat ${{ env.RELEASE_TAG }}](https://github.com/grodriguez-fr/agent-chat/releases/tag/${{ env.RELEASE_TAG }}), with its dependency lockfile.
+
+            Review the release notes and the application's CI before merging. This PR has no automatic merge and does not update the shared gateway. Deployment follows the application's existing process after merge.
+          add-paths: |
+            ${{ matrix.directory }}/package.json
+            ${{ matrix.directory }}/package-lock.json
+            ${{ matrix.directory }}/pnpm-lock.yaml
+            ${{ matrix.directory }}/vendor/agent-chat-*.tgz
