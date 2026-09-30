@@ -4,7 +4,7 @@ export function normalizeToolStatus(status) {
         return "completed";
     if (["failed", "error", "timeout"].includes(value ?? ""))
         return "failed";
-    if (["cancelled", "canceled"].includes(value ?? ""))
+    if (["cancelled", "canceled", "rejected", "denied"].includes(value ?? ""))
         return "cancelled";
     if (["running", "in_progress", "started"].includes(value ?? ""))
         return "running";

@@ -17,7 +17,8 @@ import { AgentChatShell } from "@grodriguez-fr/agent-chat/react";
 
 - `core`: normalized messages, tools, conversations and timeline helpers.
 - `react`: page/panel shell, conversation navigation, timeline and composer.
-- `client`: reconnecting WebSocket client and ACP/AI SDK protocol parsers.
+- `client`: reconnecting WebSocket client, incremental ACP/AI SDK parsers and validated stream reading.
+- `server`: shared gateway HTTP turn client with authentication, abort and pre-stream retries.
 - `styles.css`: framework-independent styles driven by `--agent-*` variables.
 
 Application-specific behavior is supplied through an `AgentChatController` and
@@ -50,3 +51,24 @@ The archive is included in their build contexts and lockfiles, so builds do not
 depend on an unpublished Git commit or a sibling checkout. For a new release,
 bump the version, run tests, pack, and update all three archives and lockfiles
 together. Source changes belong in this repository.
+
+## Shared transport (0.3.0)
+
+Use `fetchGatewayTurn` from `@grodriguez-fr/agent-chat/server` for HTTP turns.
+It takes the product payload and `{ url, secret, signal }`; MCP headers, user
+identity, history and permissions remain owned by the product. It accepts event
+contract 1 (and legacy responses without a contract header), retries only before
+accepting a successful response, and never replays a received response body.
+
+Use `readAgentDataStream` for server consumers: UTF-8 buffering, truncated
+streams, terminal errors and cancellation are validated in one place. Browser
+adapters can use `AgentDataStreamParser` incrementally or
+`parseAiSdkDataStream` for complete lines. Events include reasoning, plans,
+usage, tool diffs and terminal reasons. Omitted tool fields are patches; merge
+them with `mergeAgentToolUpdate` rather than erasing previous metadata.
+`preserveToolStatuses` allows product-specific trust statuses to survive parsing.
+`agentEventToAcpUpdate` adapts these events to an existing ACP browser transport.
+
+Reconnection, replay cursors, queues and product lifecycle policies are not
+migrated by this release. Version 0.3.0 is a local release candidate until tagged
+and published; updating these archives does not deploy the consumers.

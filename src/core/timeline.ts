@@ -4,7 +4,7 @@ export function normalizeToolStatus(status?: string): ToolStatus {
   const value = status?.toLowerCase();
   if (["completed", "complete", "success", "succeeded", "done", "ok"].includes(value ?? "")) return "completed";
   if (["failed", "error", "timeout"].includes(value ?? "")) return "failed";
-  if (["cancelled", "canceled"].includes(value ?? "")) return "cancelled";
+  if (["cancelled", "canceled", "rejected", "denied"].includes(value ?? "")) return "cancelled";
   if (["running", "in_progress", "started"].includes(value ?? "")) return "running";
   return "pending";
 }
