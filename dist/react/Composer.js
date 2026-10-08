@@ -4,6 +4,7 @@ import { ArrowUp, LoaderCircle, Mic, Paperclip, Square } from "lucide-react";
 import { ComposerQueue } from "./ComposerQueue.js";
 import { useDictation } from "./useDictation.js";
 import { ComposerSettingsPicker } from "./ComposerSettingsPicker.js";
+import { useComposerSuggestions } from "./ComposerSuggestions.js";
 export function AgentComposer({ controller, slots, placeholder = "Demande à l’agent…", settingsMenuSide = "up", onKeyDown }) {
     const textarea = useRef(null);
     const fileInput = useRef(null);
@@ -13,6 +14,7 @@ export function AgentComposer({ controller, slots, placeholder = "Demande à l�
     const [submitting, setSubmitting] = useState(false);
     const [sendError, setSendError] = useState(null);
     const voice = useDictation(controller.input, controller.setInput);
+    const suggestions = useComposerSuggestions(controller, textarea);
     const busy = controller.status === "streaming" || controller.status === "connecting";
     const canSend = (Boolean(controller.input.trim()) || controller.hasAttachments) && !controller.disabled && !controller.sendingDisabled && !submitting && (!busy || controller.allowQueue);
     useEffect(() => {
@@ -42,8 +44,10 @@ export function AgentComposer({ controller, slots, placeholder = "Demande à l�
             setSubmitting(false);
         }
     };
-    return _jsxs("div", { className: "agent-chat__composer-wrap", children: [_jsxs("div", { className: "agent-chat__composer", "data-disabled": controller.disabled || undefined, children: [_jsx(ComposerQueue, { controller: controller }), slots?.composerBefore, _jsx("textarea", { ref: textarea, "aria-label": "Message \u00E0 l\u2019agent", value: controller.input, onChange: (event) => controller.setInput(event.target.value), placeholder: controller.disabled ? controller.disabledReason ?? placeholder : placeholder, disabled: controller.disabled, rows: 1, onKeyDown: (event) => {
+    return _jsxs("div", { className: "agent-chat__composer-wrap", children: [_jsxs("div", { className: "agent-chat__composer", "data-disabled": controller.disabled || undefined, children: [_jsx(ComposerQueue, { controller: controller }), slots?.composerBefore, suggestions.list, _jsx("textarea", { ref: textarea, "aria-label": "Message \u00E0 l\u2019agent", ...suggestions.textareaProps, value: controller.input, onChange: (event) => { controller.setInput(event.target.value); suggestions.trackCaret(event.target); }, placeholder: controller.disabled ? controller.disabledReason ?? placeholder : placeholder, disabled: controller.disabled, rows: 1, onKeyDown: (event) => {
                             if (event.nativeEvent.isComposing)
+                                return;
+                            if (suggestions.handleKeyDown(event))
                                 return;
                             onKeyDown?.(event);
                             if (!event.defaultPrevented && event.key === "Enter" && !event.shiftKey) {

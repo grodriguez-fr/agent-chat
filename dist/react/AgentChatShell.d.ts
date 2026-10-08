@@ -1,3 +1,4 @@
+import { type KeyboardEventHandler } from "react";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
 export type AgentChatShellProps = {
     variant: "page" | "panel";
@@ -13,6 +14,8 @@ export type AgentChatShellProps = {
     onClose?: () => void;
     onExpand?: () => void;
     panelWidth?: string;
+    /** Runs before Enter sends; call preventDefault() to keep the default from running. */
+    onComposerKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
 };
-export declare function AgentChatShell({ variant, controller, brandName, slots, suggestions, emptyTitle, emptyDescription, placeholder, className, open, onClose, onExpand, panelWidth }: AgentChatShellProps): import("react").JSX.Element | null;
+export declare function AgentChatShell({ variant, controller, brandName, slots, suggestions, emptyTitle, emptyDescription, placeholder, className, open, onClose, onExpand, panelWidth, onComposerKeyDown }: AgentChatShellProps): import("react").JSX.Element | null;
 //# sourceMappingURL=AgentChatShell.d.ts.map

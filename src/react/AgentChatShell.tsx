@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEventHandler } from "react";
 import { ChevronDown, Maximize2, Menu, Plus, X } from "lucide-react";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
 import { AgentComposer } from "./Composer.js";
@@ -19,9 +19,11 @@ export type AgentChatShellProps = {
   onClose?: () => void;
   onExpand?: () => void;
   panelWidth?: string;
+  /** Runs before Enter sends; call preventDefault() to keep the default from running. */
+  onComposerKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
 };
 
-export function AgentChatShell({ variant, controller, brandName, slots, suggestions = [], emptyTitle = "Comment puis-je t’aider ?", emptyDescription, placeholder, className = "", open = true, onClose, onExpand, panelWidth }: AgentChatShellProps) {
+export function AgentChatShell({ variant, controller, brandName, slots, suggestions = [], emptyTitle = "Comment puis-je t’aider ?", emptyDescription, placeholder, className = "", open = true, onClose, onExpand, panelWidth, onComposerKeyDown }: AgentChatShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showJump, setShowJump] = useState(false);
   const scroll = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ export function AgentChatShell({ variant, controller, brandName, slots, suggesti
         {onClose && <button type="button" onClick={onClose} aria-label="Fermer"><X size={18} /></button>}
       </header>
       <div className="agent-chat__content">
-        {isEmpty ? <div className="agent-chat__empty">{slots?.emptyBefore}<div className="agent-chat__empty-mark">{slots?.brand ?? brandName.slice(0, 1)}</div><h2>{emptyTitle}</h2>{emptyDescription && <p>{emptyDescription}</p>}{suggestions.length > 0 && <div className="agent-chat__suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} disabled={controller.disabled} onClick={() => controller.setInput(suggestion)}>{suggestion}</button>)}</div>}{slots?.emptyAfter}<AgentComposer controller={controller} slots={slots} placeholder={placeholder} /></div> : <><div ref={scroll} className="agent-chat__scroll" onScroll={(event) => { const node = event.currentTarget; setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 120); }}><AgentTimeline controller={controller} slots={slots} /></div>{showJump && <button type="button" className="agent-chat__jump" onClick={() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: "smooth" }); setShowJump(false); }}><ChevronDown size={15} />Bas de la conversation</button>}<footer className="agent-chat__footer"><AgentComposer controller={controller} slots={slots} placeholder={placeholder} /></footer></>}
+        {isEmpty ? <div className="agent-chat__empty">{slots?.emptyBefore}<div className="agent-chat__empty-mark">{slots?.brand ?? brandName.slice(0, 1)}</div><h2>{emptyTitle}</h2>{emptyDescription && <p>{emptyDescription}</p>}{suggestions.length > 0 && <div className="agent-chat__suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} disabled={controller.disabled} onClick={() => controller.setInput(suggestion)}>{suggestion}</button>)}</div>}{slots?.emptyAfter}<AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></div> : <><div ref={scroll} className="agent-chat__scroll" onScroll={(event) => { const node = event.currentTarget; setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 120); }}><AgentTimeline controller={controller} slots={slots} /></div>{showJump && <button type="button" className="agent-chat__jump" onClick={() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: "smooth" }); setShowJump(false); }}><ChevronDown size={15} />Bas de la conversation</button>}<footer className="agent-chat__footer"><AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></footer></>}
         {controller.error && <div className="agent-chat__error" role="alert">{controller.error}</div>}
       </div>
     </div>

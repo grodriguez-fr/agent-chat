@@ -77,6 +77,28 @@ export type QueuedPrompt = {
     id: string;
     text: string;
 };
+export type ComposerSuggestion = {
+    id: string;
+    label: string;
+    description?: string;
+    icon?: ReactNode;
+    /** Text replacing the trigger and query, for example "@offre:12". */
+    insert: string;
+};
+export type ComposerTrigger = {
+    /** Character opening the suggestions, for example "@" or "/". */
+    char: string;
+    search: (query: string) => ComposerSuggestion[] | Promise<ComposerSuggestion[]>;
+    /** Shown when the search returns nothing; the list stays hidden when omitted. */
+    emptyLabel?: string;
+    /** Accessible name of the suggestion list. */
+    label?: string;
+};
+export type InlineToken = {
+    /** Matched in message text, outside code and links. */
+    pattern: RegExp;
+    render: (match: RegExpExecArray) => ReactNode;
+};
 export type AgentChatController = {
     status: AgentStatus;
     messages: AgentMessage[];
@@ -111,6 +133,8 @@ export type AgentChatController = {
     selectedEffort?: string;
     setEffort?: (id: string) => void;
     attach?: (files: File[]) => void;
+    /** Suggestions opened by a character typed in the composer (mentions, commands). */
+    triggers?: ComposerTrigger[];
     retryMessage?: (id: string) => void;
     editMessage?: (id: string, text: string) => void;
 };
@@ -126,6 +150,8 @@ export type AgentChatSlots = {
     renderActivity?: (messages: AgentMessage[], live: boolean) => ReactNode;
     afterMessages?: ReactNode;
     renderMarkdown?: (markdown: string, streaming: boolean) => ReactNode;
+    /** Replace matching text in user and assistant messages (mention chips, links). */
+    inlineTokens?: InlineToken[];
     renderToolDetail?: (tool: AgentToolActivity) => ReactNode;
     renderMessageSlot?: (id: string, value: unknown) => ReactNode;
     renderMessageActions?: (message: AgentMessage) => ReactNode;

@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Copy, RotateCcw } from "lucide-react";
 import { buildThreadBlocks, formatDuration, messageText } from "../core/index.js";
-import { AgentMarkdown } from "./Markdown.js";
+import { AgentInlineText, AgentMarkdown } from "./Markdown.js";
 import { ActivityFeed, ToolActivity } from "./ToolActivity.js";
 function useElapsed(live, startedAt, fallback = null) {
     const [now, setNow] = useState(Date.now());
@@ -39,8 +39,8 @@ function MessageContent({ message, slots }) {
                 return _jsx(ToolActivity, { parts: group, slots: slots }, index);
             if (part.type === "text") {
                 if (message.role === "user")
-                    return _jsx("span", { children: part.text }, index);
-                return _jsx("div", { children: slots?.renderMarkdown?.(part.text, Boolean(part.streaming)) ?? _jsx(AgentMarkdown, { streaming: part.streaming, children: part.text }) }, index);
+                    return _jsx("span", { children: _jsx(AgentInlineText, { text: part.text, tokens: slots?.inlineTokens }) }, index);
+                return _jsx("div", { children: slots?.renderMarkdown?.(part.text, Boolean(part.streaming)) ?? _jsx(AgentMarkdown, { streaming: part.streaming, tokens: slots?.inlineTokens, children: part.text }) }, index);
             }
             if (part.type === "attachment")
                 return _jsx("a", { className: "agent-chat__attachment", href: part.attachment.url, target: "_blank", rel: "noreferrer", children: part.attachment.name }, part.attachment.id);
