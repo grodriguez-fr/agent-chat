@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Copy, RotateCcw } from "lucide-react";
 import { buildThreadBlocks, formatDuration, messageText, type AgentChatController, type AgentChatSlots, type AgentMessage, type AgentMessagePart } from "../core/index.js";
-import { AgentMarkdown } from "./Markdown.js";
+import { AgentInlineText, AgentMarkdown } from "./Markdown.js";
 import { ActivityFeed, ToolActivity } from "./ToolActivity.js";
 
 function useElapsed(live: boolean, startedAt?: number | null, fallback: number | null = null) {
@@ -37,8 +37,8 @@ function MessageContent({ message, slots }: { message: AgentMessage; slots?: Age
       const part = group[0];
       if (part.type === "tool" || part.type === "reasoning") return <ToolActivity key={index} parts={group} slots={slots} />;
       if (part.type === "text") {
-        if (message.role === "user") return <span key={index}>{part.text}</span>;
-        return <div key={index}>{slots?.renderMarkdown?.(part.text, Boolean(part.streaming)) ?? <AgentMarkdown streaming={part.streaming}>{part.text}</AgentMarkdown>}</div>;
+        if (message.role === "user") return <span key={index}><AgentInlineText text={part.text} tokens={slots?.inlineTokens} /></span>;
+        return <div key={index}>{slots?.renderMarkdown?.(part.text, Boolean(part.streaming)) ?? <AgentMarkdown streaming={part.streaming} tokens={slots?.inlineTokens}>{part.text}</AgentMarkdown>}</div>;
       }
       if (part.type === "attachment") return <a key={part.attachment.id} className="agent-chat__attachment" href={part.attachment.url} target="_blank" rel="noreferrer">{part.attachment.name}</a>;
       return <span key={part.id}>{slots?.renderMessageSlot?.(part.id, part.value)}</span>;

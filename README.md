@@ -72,3 +72,38 @@ them with `mergeAgentToolUpdate` rather than erasing previous metadata.
 Reconnection, replay cursors, queues and product lifecycle policies are not
 migrated by this release. Version 0.3.0 is a local release candidate until tagged
 and published; updating these archives does not deploy the consumers.
+
+## Composer triggers and inline tokens (0.4.0)
+
+`controller.triggers` opens suggestions when a character is typed at the start
+of a word: mentions with `@`, commands with `/`, and so on. The composer handles
+↑/↓, Enter or Tab to insert, and Escape to close the list (without closing the
+panel). Enter only sends when the list is closed. `search` can be sync or async;
+results from earlier queries are ignored. The selected suggestion's `insert`
+text replaces the trigger and query, followed by a space.
+
+```tsx
+const controller = {
+  // …
+  triggers: [{
+    char: "@",
+    label: "Offres",
+    emptyLabel: "Aucune offre",
+    search: (query) => offers
+      .filter((offer) => offer.title.toLowerCase().includes(query.toLowerCase()))
+      .map((offer) => ({ id: String(offer.id), label: offer.title, description: `#${offer.id}`, insert: `@offre:${offer.id}` })),
+  }],
+};
+```
+
+`slots.inlineTokens` renders matching text in user messages and assistant
+Markdown (outside code and links), for example mention chips:
+
+```tsx
+slots={{ inlineTokens: [{ pattern: /@offre:(\d+)/, render: (match) => <OfferChip id={Number(match[1])} /> }] }}
+```
+
+Messages keep their plain text (`@offre:12`); resolving and validating the
+entity stays in the consumer. `findTriggerMatch`, `applySuggestion` and
+`splitInlineTokens` are exported from `core` for editors outside the composer.
+`AgentChatShell` also forwards `onComposerKeyDown` to the composer.

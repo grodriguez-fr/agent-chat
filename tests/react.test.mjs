@@ -123,3 +123,15 @@ test("shared activity hides raw tool identifiers behind natural summaries", () =
   assert.match(html, /Voici les offres/);
   assert.doesNotMatch(html, /mcp__jobfinder__list_offres/);
 });
+
+test("inline tokens render in user and assistant text, but not in code or links", () => {
+  const inlineTokens = [{ pattern: /@offre:(\d+)/, render: (match) => React.createElement("b", { className: "chip" }, `Offre ${match[1]}`) }];
+  const html = renderToStaticMarkup(React.createElement(AgentTimeline, { slots: { inlineTokens }, controller: { ...controller, messages: [
+    { id: "u", role: "user", parts: [{ type: "text", text: "Compare @offre:12" }] },
+    { id: "a", role: "assistant", parts: [{ type: "text", text: "**@offre:31** et `@offre:4` puis [@offre:5](https://example.com)" }] },
+  ] } }));
+  assert.match(html, /<b class="chip">Offre 12<\/b>/);
+  assert.match(html, /<strong><b class="chip">Offre 31<\/b><\/strong>/);
+  assert.match(html, /<code>@offre:4<\/code>/);
+  assert.match(html, /<a href="https:\/\/example.com">@offre:5<\/a>/);
+});
