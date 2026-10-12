@@ -177,6 +177,7 @@ button.agent-chat__execution-header { cursor: pointer; }
 .agent-chat__sidebar-content { display: flex; height: 100%; min-height: 0; flex-direction: column; }
 .agent-chat__sidebar-brand { display: flex; height: 3rem; flex: 0 0 3rem; align-items: center; gap: .5rem; padding: 0 .75rem; }
 .agent-chat__sidebar-actions { display: flex; flex-direction: column; gap: .3rem; padding: .25rem .5rem .5rem; }
+.agent-chat__sidebar-actions:first-child { padding-top: .5rem; }
 .agent-chat__sidebar-actions > button { display: flex; height: 2rem; align-items: center; gap: .5rem; border: 0; border-radius: .5rem; padding: 0 .55rem; background: transparent; cursor: pointer; text-align: left; }
 .agent-chat__sidebar-actions > button:hover { background: var(--agent-surface); }
 .agent-chat__search { display: flex; height: 2rem; align-items: center; gap: .4rem; border: 1px solid var(--agent-border); border-radius: .55rem; padding: 0 .5rem; background: var(--agent-background); color: var(--agent-muted); }

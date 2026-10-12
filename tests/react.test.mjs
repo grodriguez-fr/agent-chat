@@ -135,3 +135,36 @@ test("inline tokens render in user and assistant text, but not in code or links"
   assert.match(html, /<code>@offre:4<\/code>/);
   assert.match(html, /<a href="https:\/\/example.com">@offre:5<\/a>/);
 });
+
+const withConversations = { ...controller, conversations: [{ id: "c1", title: "Plan", updatedAt: Date.now() }], selectConversation() {}, newConversation() {} };
+
+test("conversation column uses the brand slot and can drop its brand row", () => {
+  const branded = renderToStaticMarkup(React.createElement(AgentChatShell, {
+    variant: "page",
+    brandName: "Logos",
+    controller: withConversations,
+    slots: { brand: React.createElement("img", { className: "logo", alt: "" }) },
+  }));
+  const sidebar = branded.slice(branded.indexOf("agent-chat__sidebar-brand"), branded.indexOf("agent-chat__sidebar-actions"));
+  assert.match(sidebar, /<img class="logo"/);
+  assert.doesNotMatch(sidebar, /agent-chat__brand-mark/);
+  const monogram = renderToStaticMarkup(React.createElement(AgentChatShell, { variant: "page", brandName: "Talos", controller: withConversations }));
+  assert.match(monogram, /agent-chat__sidebar-brand"><span class="agent-chat__brand-mark" aria-hidden="true">T<\/span><strong>Talos<\/strong>/);
+  const hidden = renderToStaticMarkup(React.createElement(AgentChatShell, { variant: "page", brandName: "Logos", controller: withConversations, showSidebarBrand: false }));
+  assert.match(hidden, /agent-chat__sidebar-actions/);
+  assert.doesNotMatch(hidden, /agent-chat__sidebar-brand/);
+});
+
+test("untitled conversations show the fallback title, brand name by default", () => {
+  const title = (props) => renderToStaticMarkup(React.createElement(AgentChatShell, { variant: "page", brandName: "Logos", controller: withConversations, ...props })).match(/agent-chat__brand">.*?<span>([^<]*)<\/span>/)[1];
+  assert.equal(title({}), "Logos");
+  assert.equal(title({ fallbackTitle: "Nouvelle conversation" }), "Nouvelle conversation");
+  assert.equal(title({ fallbackTitle: "Nouvelle conversation", controller: { ...withConversations, activeConversationTitle: "Plan" } }), "Plan");
+});
+
+test("header new conversation button has a class and can defer to the column on desktop", () => {
+  const button = (props) => renderToStaticMarkup(React.createElement(AgentChatShell, { brandName: "Logos", controller: withConversations, ...props })).match(/<button[^>]*aria-label="Nouvelle conversation"[^>]*>/)[0];
+  assert.match(button({ variant: "page" }), /class="agent-chat__new-conversation"/);
+  assert.match(button({ variant: "page", dedupeNewConversation: true }), /class="agent-chat__new-conversation agent-chat__mobile-only"/);
+  assert.match(button({ variant: "panel", dedupeNewConversation: true }), /class="agent-chat__new-conversation"/);
+});

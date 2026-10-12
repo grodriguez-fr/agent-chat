@@ -46,3 +46,38 @@ Ce workflow ne met pas à jour le gateway. Son protocole doit rester compatible
 avec les versions des trois applications en production. Une rupture nécessite
 une migration explicite. Déployer une image identifiée par digest, conserver
 l'image précédente et son cache local pour permettre un retour arrière.
+
+## Passer de 0.3.1 à 0.4.1
+
+0.3.1 (archive d'Organisation) correspond à 0.3.0 plus le passage des couleurs
+de bouton et de lien Markdown dans la couche CSS `base`. Ce correctif est arrivé
+sur `main` après le tag `v0.4.0` : l'archive 0.4.0 ne le contient pas et ferait
+régresser les couleurs de liens. Passer directement à 0.4.1.
+
+Ce que 0.4.0 ajoute, sans rien changer pour un consommateur qui ne s'en sert pas :
+
+- `controller.triggers` (suggestions `@`, `/` dans le composer) et
+  `slots.inlineTokens` (pastilles dans les messages) ;
+- `onComposerKeyDown` sur `AgentChatShell`. Quand une liste de suggestions est
+  ouverte, Entrée, Tab, ↑/↓ et Échap lui reviennent avant ce gestionnaire.
+
+Ce que 0.4.1 ajoute, toujours optionnel :
+
+- la colonne de conversations affiche `slots.brand` au lieu du monogramme. Un
+  produit qui fournit `slots.brand` et une liste de conversations en `variant="page"`
+  voit donc son logo dans la colonne ;
+- `fallbackTitle`, `showSidebarBrand` et `dedupeNewConversation` (voir le README) ;
+- la classe `agent-chat__new-conversation` sur le bouton de l'en-tête.
+
+Marche à suivre pour un consommateur :
+
+1. Ici : `npm test`, puis `npm pack` pour produire `agent-chat-0.4.1.tgz`.
+2. Copier l'archive dans `vendor/`, pointer la dépendance `file:vendor/agent-chat-0.4.1.tgz`,
+   régénérer le lockfile et lancer `scripts/check-agent-packages.mjs` côté Organisation.
+3. Remplacer les surcharges CSS qui ciblaient la marque de la colonne ou le bouton
+   par son `aria-label` par les props ci-dessus. Pour Organisation :
+   `fallbackTitle="Nouvelle conversation"`, `showSidebarBrand={false}` et
+   `dedupeNewConversation`, puis supprimer de `agent-chat-overrides.css` les règles
+   sur `.agent-chat__sidebar-brand`, le `padding-top` de `.agent-chat__sidebar-actions`
+   (géré par la bibliothèque quand la marque est masquée) et
+   `button[aria-label='Nouvelle conversation']`.

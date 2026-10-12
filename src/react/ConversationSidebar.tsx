@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Check, Pencil, Pin, PinOff, Plus, Search, Trash2, X } from "lucide-react";
 import { groupConversations, type AgentChatController } from "../core/index.js";
 
-export function ConversationSidebar({ controller, brandName, onNavigate }: { controller: AgentChatController; brandName: string; onNavigate?: () => void }) {
+export function ConversationSidebar({ controller, brandName, brand, showBrand = true, onNavigate }: { controller: AgentChatController; brandName: string; brand?: ReactNode; showBrand?: boolean; onNavigate?: () => void }) {
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -20,7 +20,7 @@ export function ConversationSidebar({ controller, brandName, onNavigate }: { con
 
   return (
     <div className="agent-chat__sidebar-content">
-      <div className="agent-chat__sidebar-brand"><span className="agent-chat__brand-mark" aria-hidden>{brandName.slice(0, 1)}</span><strong>{brandName}</strong></div>
+      {showBrand && <div className="agent-chat__sidebar-brand">{brand ?? <span className="agent-chat__brand-mark" aria-hidden>{brandName.slice(0, 1)}</span>}<strong>{brandName}</strong></div>}
       <div className="agent-chat__sidebar-actions">
         {controller.newConversation && <button type="button" onClick={() => { controller.newConversation?.(); onNavigate?.(); }}><Plus size={16} />Nouvelle conversation</button>}
         <label className="agent-chat__search"><Search size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher…" aria-label="Rechercher une conversation" />{query && <button type="button" onClick={() => setQuery("")} aria-label="Effacer"><X size={13} /></button>}</label>

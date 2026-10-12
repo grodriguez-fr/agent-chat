@@ -114,3 +114,22 @@ Generic button and Markdown link colors live in the CSS `base` layer so
 product renderers can override them with normal styles or Tailwind utilities.
 Component-specific chat controls keep their existing styles. No `!important`
 is needed for custom entity links.
+
+## Header and conversation column (0.4.1)
+
+Three optional `AgentChatShell` props; the defaults keep the 0.4.0 rendering.
+
+| Prop | Default | Effect |
+| --- | --- | --- |
+| `fallbackTitle` | `brandName` | Header title when the active conversation has no title. |
+| `showSidebarBrand` | `true` | `false` removes the brand row at the top of the conversation column and its drawer. |
+| `dedupeNewConversation` | `false` | `true` hides the header "Nouvelle conversation" button on desktop when the conversation column is shown; phones keep it. |
+
+The conversation column now renders `slots.brand` in place of the monogram,
+like the header and empty state. The header button carries the
+`agent-chat__new-conversation` class.
+
+```tsx
+<AgentChatShell variant="page" brandName="Logos" controller={controller}
+  fallbackTitle="Nouvelle conversation" showSidebarBrand={false} dedupeNewConversation />
+```

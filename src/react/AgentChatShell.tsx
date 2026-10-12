@@ -21,14 +21,21 @@ export type AgentChatShellProps = {
   panelWidth?: string;
   /** Runs before Enter sends; call preventDefault() to keep the default from running. */
   onComposerKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
+  /** Header title when the active conversation has no title; defaults to `brandName`. */
+  fallbackTitle?: string;
+  /** Show the brand row at the top of the conversation column; defaults to true. */
+  showSidebarBrand?: boolean;
+  /** Hide the header "Nouvelle conversation" button on desktop when the conversation column shows its own. */
+  dedupeNewConversation?: boolean;
 };
 
-export function AgentChatShell({ variant, controller, brandName, slots, suggestions = [], emptyTitle = "Comment puis-je t’aider ?", emptyDescription, placeholder, className = "", open = true, onClose, onExpand, panelWidth, onComposerKeyDown }: AgentChatShellProps) {
+export function AgentChatShell({ variant, controller, brandName, slots, suggestions = [], emptyTitle = "Comment puis-je t’aider ?", emptyDescription, placeholder, className = "", open = true, onClose, onExpand, panelWidth, onComposerKeyDown, fallbackTitle = brandName, showSidebarBrand = true, dedupeNewConversation = false }: AgentChatShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showJump, setShowJump] = useState(false);
   const scroll = useRef<HTMLDivElement>(null);
   const hasConversations = Boolean(controller.conversations && controller.selectConversation);
   const isEmpty = controller.messages.length === 0;
+  const hasSidebar = variant === "page" && hasConversations;
 
   useEffect(() => {
     const node = scroll.current;
@@ -39,14 +46,14 @@ export function AgentChatShell({ variant, controller, brandName, slots, suggesti
   if (variant === "panel" && !open) return null;
   const style = panelWidth ? ({ "--agent-panel-width": panelWidth } as CSSProperties) : undefined;
   return <div className={`agent-chat agent-chat--${variant} ${className}`} style={style} role={variant === "panel" ? "complementary" : undefined} aria-label={`${brandName} — conversation`} onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { if (drawerOpen) setDrawerOpen(false); else onClose?.(); } }}>
-    {variant === "page" && hasConversations && <aside className="agent-chat__sidebar"><ConversationSidebar controller={controller} brandName={brandName} /></aside>}
+    {hasSidebar && <aside className="agent-chat__sidebar"><ConversationSidebar controller={controller} brandName={brandName} brand={slots?.brand} showBrand={showSidebarBrand} /></aside>}
     <div className="agent-chat__main">
       <header className="agent-chat__topbar">
         {hasConversations && <button type="button" onClick={() => setDrawerOpen(true)} aria-label="Conversations" className={variant === "page" ? "agent-chat__mobile-only" : ""}><Menu size={19} /></button>}
-        <div className="agent-chat__brand">{slots?.brand ?? <span className="agent-chat__brand-mark" aria-hidden>{brandName.slice(0, 1)}</span>}<span>{controller.activeConversationTitle || brandName}</span></div>
+        <div className="agent-chat__brand">{slots?.brand ?? <span className="agent-chat__brand-mark" aria-hidden>{brandName.slice(0, 1)}</span>}<span>{controller.activeConversationTitle || fallbackTitle}</span></div>
         <div className="agent-chat__header-status">{controller.status !== "ready" && controller.status !== "idle" ? controller.status === "streaming" ? "En cours…" : controller.status === "connecting" ? "Connexion…" : controller.status === "error" ? "Erreur" : "" : ""}</div>
         {slots?.headerTrailing}
-        {controller.newConversation && <button type="button" onClick={controller.newConversation} aria-label="Nouvelle conversation"><Plus size={18} /></button>}
+        {controller.newConversation && <button type="button" onClick={controller.newConversation} aria-label="Nouvelle conversation" className={`agent-chat__new-conversation${dedupeNewConversation && hasSidebar ? " agent-chat__mobile-only" : ""}`}><Plus size={18} /></button>}
         {onExpand && <button type="button" onClick={onExpand} aria-label="Ouvrir en plein écran"><Maximize2 size={17} /></button>}
         {onClose && <button type="button" onClick={onClose} aria-label="Fermer"><X size={18} /></button>}
       </header>
@@ -55,6 +62,6 @@ export function AgentChatShell({ variant, controller, brandName, slots, suggesti
         {controller.error && <div className="agent-chat__error" role="alert">{controller.error}</div>}
       </div>
     </div>
-    {drawerOpen && hasConversations && <div className="agent-chat__drawer"><button type="button" className="agent-chat__scrim" onClick={() => setDrawerOpen(false)} aria-label="Fermer les conversations" /><aside><ConversationSidebar controller={controller} brandName={brandName} onNavigate={() => setDrawerOpen(false)} /></aside></div>}
+    {drawerOpen && hasConversations && <div className="agent-chat__drawer"><button type="button" className="agent-chat__scrim" onClick={() => setDrawerOpen(false)} aria-label="Fermer les conversations" /><aside><ConversationSidebar controller={controller} brandName={brandName} brand={slots?.brand} showBrand={showSidebarBrand} onNavigate={() => setDrawerOpen(false)} /></aside></div>}
   </div>;
 }
