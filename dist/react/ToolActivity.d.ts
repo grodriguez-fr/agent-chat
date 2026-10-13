@@ -1,9 +1,9 @@
-import { Wrench } from "lucide-react";
+import { type ChatIconName } from "./icons.js";
 import type { AgentChatSlots, AgentMessage, AgentMessagePart, AgentToolActivity } from "../core/index.js";
 type Action = {
     ongoing: string;
     done: string;
-    icon: typeof Wrench;
+    icon: ChatIconName;
 };
 /** Common tool labels live in the package so each application gets the same presentation. */
 export declare function toolAction(tool: AgentToolActivity): Action;

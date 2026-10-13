@@ -4,3 +4,4 @@ export * from "./ComposerSettingsPicker.js";
 export * from "./ConversationSidebar.js";
 export * from "./Markdown.js";
 export * from "./Timeline.js";
+export * from "./icons.js";

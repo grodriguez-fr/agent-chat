@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEventHandler } from "react";
-import { ArrowUp, LoaderCircle, Mic, Paperclip, Square } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
 import { ComposerQueue } from "./ComposerQueue.js";
 import { useDictation } from "./useDictation.js";
@@ -54,13 +54,13 @@ export function AgentComposer({ controller, slots, placeholder = "Demande à l�
       }} />
       <div className="agent-chat__composer-toolbar">
         <div className="agent-chat__composer-leading">{slots?.composerLeading}
-          {controller.attach && <><input ref={fileInput} hidden type="file" multiple onChange={(event) => { controller.attach?.(Array.from(event.target.files ?? [])); event.target.value = ""; }} /><button type="button" disabled={controller.disabled || controller.sendingDisabled} onClick={() => fileInput.current?.click()} aria-label="Joindre"><Paperclip size={15} /></button></>}
+          {controller.attach && <><input ref={fileInput} hidden type="file" multiple onChange={(event) => { controller.attach?.(Array.from(event.target.files ?? [])); event.target.value = ""; }} /><button type="button" disabled={controller.disabled || controller.sendingDisabled} onClick={() => fileInput.current?.click()} aria-label="Joindre"><ChatIcon name="attach" size={15} /></button></>}
           {controller.models && controller.setModel && controller.efforts && controller.setEffort && <ComposerSettingsPicker models={controller.models} selectedModel={controller.selectedModel} setModel={controller.setModel} efforts={controller.efforts} selectedEffort={controller.selectedEffort} setEffort={controller.setEffort} disabled={Boolean(controller.disabled)} menuSide={settingsMenuSide} />}
         </div>
         <div className="agent-chat__composer-trailing">{slots?.composerTrailing}
-          {slots?.voiceControl !== undefined ? slots.voiceControl : voice.supported && <button type="button" disabled={controller.disabled} onClick={voice.toggle} className={voice.listening ? "is-active" : ""} aria-pressed={voice.listening} aria-label={voice.listening ? "Arrêter la dictée" : "Dicter un message"}><Mic size={15} /></button>}
-          {controller.status === "streaming" && controller.stop && <button type="button" className="agent-chat__stop" onClick={controller.stop} aria-label="Interrompre la réponse"><Square size={13} fill="currentColor" /></button>}
-          <button type="button" className="agent-chat__send" onClick={() => void send()} disabled={!canSend} aria-busy={submitting || controller.status === "connecting"} aria-label={controller.status === "streaming" && controller.allowQueue ? "Mettre en file" : "Envoyer"}>{submitting || controller.status === "connecting" ? <LoaderCircle size={16} className="is-spinning" /> : <ArrowUp size={16} strokeWidth={2.5} />}</button>
+          {slots?.voiceControl !== undefined ? slots.voiceControl : voice.supported && <button type="button" disabled={controller.disabled} onClick={voice.toggle} className={voice.listening ? "is-active" : ""} aria-pressed={voice.listening} aria-label={voice.listening ? "Arrêter la dictée" : "Dicter un message"}><ChatIcon name="mic" size={15} /></button>}
+          {controller.status === "streaming" && controller.stop && <button type="button" className="agent-chat__stop" onClick={controller.stop} aria-label="Interrompre la réponse"><ChatIcon name="stop" size={13} /></button>}
+          <button type="button" className="agent-chat__send" onClick={() => void send()} disabled={!canSend} aria-busy={submitting || controller.status === "connecting"} aria-label={controller.status === "streaming" && controller.allowQueue ? "Mettre en file" : "Envoyer"}>{submitting || controller.status === "connecting" ? <ChatIcon name="spinner" size={16} /> : <ChatIcon name="send" size={16} />}</button>
         </div>
       </div>
     </div>

@@ -1,25 +1,25 @@
 import { useState } from "react";
-import { Brain, Check, ChevronDown, ChevronRight, CircleAlert, FilePenLine, FileSearch, Globe, LoaderCircle, Terminal, Wrench, X } from "lucide-react";
+import { ChatIcon, type ChatIconName } from "./icons.js";
 import type { AgentChatSlots, AgentMessage, AgentMessagePart, AgentToolActivity } from "../core/index.js";
 import { AgentMarkdown } from "./Markdown.js";
 
 const states = { pending: "En attente", running: "En cours", completed: "Terminé", failed: "Échec", cancelled: "Annulé" };
-type Action = { ongoing: string; done: string; icon: typeof Wrench };
+type Action = { ongoing: string; done: string; icon: ChatIconName };
 
 /** Common tool labels live in the package so each application gets the same presentation. */
 export function toolAction(tool: AgentToolActivity): Action {
   const name = `${tool.kind ?? ""} ${tool.title}`.toLowerCase();
-  if (/list[_ -]?(offres|offers|jobs)/.test(name)) return { ongoing: "Consulte les offres", done: "Offres consultées", icon: FileSearch };
-  if (/show[_ -]?(offre|offer|job)/.test(name)) return { ongoing: "Examine une offre", done: "Offre examinée", icon: FileSearch };
-  if (/next[_ -]?action/.test(name)) return { ongoing: "Cherche la prochaine action", done: "Prochaine action recherchée", icon: FileSearch };
-  if (/criter|criteria/.test(name)) return { ongoing: "Vérifie les critères", done: "Critères vérifiés", icon: FileSearch };
-  if (/\bgrep\b|\brg\b|ripgrep|glob|search|find/.test(name)) return { ongoing: "Recherche dans les fichiers", done: "Recherche terminée", icon: FileSearch };
-  if (/edit|write|replace|patch|diff/.test(name) || tool.diffs?.length) return { ongoing: "Modifie les fichiers", done: "Fichiers modifiés", icon: FilePenLine };
-  if (/read|open|cat|file/.test(name) || tool.path) return { ongoing: "Lit un fichier", done: "Fichier consulté", icon: FileSearch };
-  if (/web|browse|fetch|url|http/.test(name)) return { ongoing: "Consulte le web", done: "Page consultée", icon: Globe };
-  if (/terminal|execute|command|bash|shell|exec/.test(name) || tool.command) return { ongoing: "Exécute une commande", done: "Commande exécutée", icon: Terminal };
-  if (/analys|propos/.test(name)) return { ongoing: "Prépare une analyse", done: "Analyse préparée", icon: Brain };
-  return { ongoing: "Explore les informations", done: "Informations consultées", icon: Wrench };
+  if (/list[_ -]?(offres|offers|jobs)/.test(name)) return { ongoing: "Consulte les offres", done: "Offres consultées", icon: "file-search" };
+  if (/show[_ -]?(offre|offer|job)/.test(name)) return { ongoing: "Examine une offre", done: "Offre examinée", icon: "file-search" };
+  if (/next[_ -]?action/.test(name)) return { ongoing: "Cherche la prochaine action", done: "Prochaine action recherchée", icon: "file-search" };
+  if (/criter|criteria/.test(name)) return { ongoing: "Vérifie les critères", done: "Critères vérifiés", icon: "file-search" };
+  if (/\bgrep\b|\brg\b|ripgrep|glob|search|find/.test(name)) return { ongoing: "Recherche dans les fichiers", done: "Recherche terminée", icon: "file-search" };
+  if (/edit|write|replace|patch|diff/.test(name) || tool.diffs?.length) return { ongoing: "Modifie les fichiers", done: "Fichiers modifiés", icon: "file-edit" };
+  if (/read|open|cat|file/.test(name) || tool.path) return { ongoing: "Lit un fichier", done: "Fichier consulté", icon: "file-search" };
+  if (/web|browse|fetch|url|http/.test(name)) return { ongoing: "Consulte le web", done: "Page consultée", icon: "web" };
+  if (/terminal|execute|command|bash|shell|exec/.test(name) || tool.command) return { ongoing: "Exécute une commande", done: "Commande exécutée", icon: "terminal" };
+  if (/analys|propos/.test(name)) return { ongoing: "Prépare une analyse", done: "Analyse préparée", icon: "thinking" };
+  return { ongoing: "Explore les informations", done: "Informations consultées", icon: "tool" };
 }
 
 function shortTarget(tool: AgentToolActivity) {
@@ -33,19 +33,18 @@ function shortTarget(tool: AgentToolActivity) {
 export function ToolRow({ tool, slots }: { tool: AgentToolActivity; slots?: AgentChatSlots }) {
   const [open, setOpen] = useState(false);
   const action = toolAction(tool);
-  const Icon = action.icon;
-  const Status = tool.status === "running" ? LoaderCircle : tool.status === "completed" ? Check : tool.status === "cancelled" ? X : CircleAlert;
+  const status: ChatIconName = tool.status === "running" ? "spinner" : tool.status === "completed" ? "check" : tool.status === "cancelled" ? "close" : "error";
   const details = slots?.renderToolDetail?.(tool);
   const hasDetail = Boolean(details || tool.detail || tool.command || tool.output || tool.path || tool.diffs?.length);
   const label = tool.status === "running" || tool.status === "pending" ? action.ongoing : action.done;
   const target = shortTarget(tool);
   return <div className={`agent-chat__activity-item agent-chat__activity-item--${tool.status}`}>
     <button type="button" className="agent-chat__activity-item-head" onClick={() => { if (hasDetail) setOpen(!open); }} aria-expanded={hasDetail ? open : undefined} aria-label={`${label}${target ? ` — ${target}` : ""}`} title={states[tool.status]} disabled={!hasDetail}>
-      <span className="agent-chat__activity-item-chevron" aria-hidden>{hasDetail && (open ? <ChevronDown size={13} /> : <ChevronRight size={13} />)}</span>
-      <span className="agent-chat__activity-item-icon"><Icon size={14} aria-hidden /></span>
+      <span className="agent-chat__activity-item-chevron" aria-hidden>{hasDetail && (open ? <ChatIcon name="chevron-down" size={13} /> : <ChatIcon name="chevron-right" size={13} />)}</span>
+      <span className="agent-chat__activity-item-icon"><ChatIcon name={action.icon} size={14} /></span>
       <span className="agent-chat__activity-item-label">{label}</span>
       {target && <span className="agent-chat__activity-item-target" title={tool.path ?? tool.detail ?? undefined}>{target}</span>}
-      <span className="agent-chat__activity-item-status"><Status size={12} className={tool.status === "running" ? "is-spinning" : ""} aria-hidden />{tool.status !== "completed" && <span>{states[tool.status]}</span>}</span>
+      <span className="agent-chat__activity-item-status"><ChatIcon name={status} size={12} />{tool.status !== "completed" && <span>{states[tool.status]}</span>}</span>
     </button>
     {open && hasDetail && <div className="agent-chat__activity-item-detail">{details ?? <>
       <span className="agent-chat__activity-item-raw">{tool.title}</span>
@@ -76,8 +75,8 @@ export function ToolActivity({ parts, slots, live = false }: { parts: AgentMessa
   const tools = parts.flatMap((part) => part.type === "tool" ? [part.tool] : []);
   return <div className="agent-chat__activity">
     <button type="button" className="agent-chat__activity-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
-      {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-      <Brain size={14} aria-hidden /><span className={live ? "agent-chat__activity-live" : undefined}>{groupLabel(tools, live)}</span>
+      {open ? <ChatIcon name="chevron-down" size={14} /> : <ChatIcon name="chevron-right" size={14} />}
+      <ChatIcon name="thinking" size={14} /><span className={live ? "agent-chat__activity-live" : undefined}>{groupLabel(tools, live)}</span>
     </button>
     {open && <div className="agent-chat__activity-details">{parts.map((part, index) => part.type === "tool"
       ? <ToolRow key={part.tool.id} tool={part.tool} slots={slots} />

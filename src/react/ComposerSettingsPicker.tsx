@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import type { ComposerOption } from "../core/index.js";
 
 type Props = {
@@ -109,23 +109,23 @@ export function ComposerSettingsPicker({ models, selectedModel, setModel, effort
       <span className="agent-chat__settings-model">{shortLabel(currentModel)}</span>
       <span aria-hidden="true" className="agent-chat__settings-separator">·</span>
       <span className="agent-chat__settings-effort">{currentEffort.label}</span>
-      <ChevronDown size={16} className="agent-chat__settings-chevron" />
+      <ChatIcon name="chevron-down" size={16} className="agent-chat__settings-chevron" />
     </button>
     {open && <div role="dialog" aria-label="Réglages du modèle et du raisonnement" className={popoverClass + (popoverStyle ? " is-positioned" : "")} style={popoverStyle}>
       {panelView === "models" ? <div className="agent-chat__settings-models" role="listbox" aria-label="Sélectionner un modèle">
-        <button type="button" onClick={() => setPanelView("settings")} className="agent-chat__settings-back"><ChevronLeft size={16} /><span>Modèles</span></button>
+        <button type="button" onClick={() => setPanelView("settings")} className="agent-chat__settings-back"><ChatIcon name="chevron-left" size={16} /><span>Modèles</span></button>
         {models.map((option) => <button key={option.id} type="button" role="option" aria-selected={option.id === selectedModel} onClick={() => { setModel(option.id); setOpen(false); }} className={"agent-chat__settings-option" + (option.id === selectedModel ? " is-selected" : "")}>
           <ProviderMark option={option} />
           <span className="agent-chat__settings-option-copy"><strong>{shortLabel(option)}</strong></span>
-          {option.id === selectedModel && <Check size={16} />}
+          {option.id === selectedModel && <ChatIcon name="check" size={16} />}
         </button>)}
       </div> : <div className="agent-chat__settings-view">
         <button type="button" onClick={() => setPanelView("models")} className="agent-chat__settings-model-row">
           <span><strong><ProviderMark option={currentModel} />{shortLabel(currentModel)}</strong></span>
-          <ChevronRight size={16} />
+          <ChatIcon name="chevron-right" size={16} />
         </button>
         <div className="agent-chat__settings-effort-panel">
-          <div className="agent-chat__settings-effort-heading"><span><strong>{currentEffort.label}</strong><ChevronRight size={13} /></span><button type="button" aria-label="Réinitialiser l'effort" onClick={() => setEffort(efforts[Math.floor((efforts.length - 1) / 2)]?.id ?? currentEffort.id)}><RotateCcw size={14} /></button></div>
+          <div className="agent-chat__settings-effort-heading"><span><strong>{currentEffort.label}</strong><ChatIcon name="chevron-right" size={13} /></span><button type="button" aria-label="Réinitialiser l'effort" onClick={() => setEffort(efforts[Math.floor((efforts.length - 1) / 2)]?.id ?? currentEffort.id)}><ChatIcon name="retry" size={14} /></button></div>
           <div className="agent-chat__settings-effort-model">{shortLabel(currentModel)}</div>
           <input aria-label="Niveau d'effort" type="range" min="0" max={efforts.length - 1} step="1" value={effortIndex} onChange={(event) => setEffort(efforts[Number(event.currentTarget.value)]?.id ?? currentEffort.id)} style={{ background: "linear-gradient(to right, var(--agent-accent) " + effortProgress + "%, color-mix(in srgb, var(--agent-text) 16%, transparent) " + effortProgress + "%)" }} />
         </div>

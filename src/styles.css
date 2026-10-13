@@ -102,7 +102,7 @@ button.agent-chat__execution-header { cursor: pointer; }
 .agent-chat__tool > button { display: flex; width: 100%; align-items: center; gap: .45rem; padding: .45rem .6rem; border: 0; background: transparent; text-align: left; cursor: pointer; }
 .agent-chat__tool > button > span:nth-last-child(2) { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; font-weight: 600; }
 .agent-chat__tool small { color: var(--agent-muted); font-size: .68rem; }
-.agent-chat__tool--failed svg { color: var(--agent-danger); } .agent-chat__tool--completed svg { color: #10b981; } .agent-chat__tool--running svg { color: var(--agent-accent); }
+.agent-chat__tool--failed .agent-chat__icon { color: var(--agent-danger); } .agent-chat__tool--completed .agent-chat__icon { color: #10b981; } .agent-chat__tool--running .agent-chat__icon { color: var(--agent-accent); }
 .agent-chat__tool-spacer { width: .875rem; }
 .agent-chat__tool-detail { border-top: 1px solid var(--agent-border); padding: .6rem; color: var(--agent-muted); font-size: .75rem; }
 .agent-chat__tool-detail pre { max-height: 14rem; overflow: auto; border-radius: .55rem; padding: .6rem; background: #111113; color: #e4e4e7; white-space: pre-wrap; }
@@ -155,7 +155,7 @@ button.agent-chat__execution-header { cursor: pointer; }
 .agent-chat__settings-effort-panel input[type="range"]::-webkit-slider-thumb { width: 1.45rem; height: 1.45rem; appearance: none; border: 2px solid var(--agent-surface-raised); border-radius: 999px; background: var(--agent-text); box-shadow: 0 1px 5px rgb(0 0 0 / .22); }
 .agent-chat__settings-effort-panel input[type="range"]::-moz-range-thumb { width: 1.25rem; height: 1.25rem; border: 2px solid var(--agent-surface-raised); border-radius: 999px; background: var(--agent-text); box-shadow: 0 1px 5px rgb(0 0 0 / .22); }
 .agent-chat__composer-leading > button:not(.agent-chat__settings-trigger), .agent-chat__composer-trailing button { display: inline-flex; align-items: center; justify-content: center; width: 1.95rem; height: 1.95rem; padding: 0; border: 0; border-radius: 999px; background: transparent; cursor: pointer; flex-shrink: 0; }
-.agent-chat__composer-leading > button:not(.agent-chat__settings-trigger) svg, .agent-chat__composer-trailing button svg { width: 15px; height: 15px; }
+.agent-chat__composer-leading > button:not(.agent-chat__settings-trigger) .agent-chat__icon, .agent-chat__composer-trailing button .agent-chat__icon { width: 15px; height: 15px; font-size: 15px; }
 .agent-chat__composer-trailing .agent-chat__send { background: var(--agent-text); color: var(--agent-background); border-radius: 999px; }
 .agent-chat__composer-trailing .agent-chat__stop { background: color-mix(in srgb, var(--agent-danger) 10%, transparent); color: var(--agent-danger); border-radius: 999px; }
 .agent-chat__composer-trailing button:disabled { opacity: .35; cursor: default; }

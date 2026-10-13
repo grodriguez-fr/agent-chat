@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEventHandler } from "react";
-import { ChevronDown, Maximize2, Menu, Plus, X } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import type { AgentChatController, AgentChatSlots } from "../core/index.js";
 import { AgentComposer } from "./Composer.js";
 import { ConversationSidebar } from "./ConversationSidebar.js";
@@ -49,16 +49,16 @@ export function AgentChatShell({ variant, controller, brandName, slots, suggesti
     {hasSidebar && <aside className="agent-chat__sidebar"><ConversationSidebar controller={controller} brandName={brandName} brand={slots?.brand} showBrand={showSidebarBrand} /></aside>}
     <div className="agent-chat__main">
       <header className="agent-chat__topbar">
-        {hasConversations && <button type="button" onClick={() => setDrawerOpen(true)} aria-label="Conversations" className={variant === "page" ? "agent-chat__mobile-only" : ""}><Menu size={19} /></button>}
+        {hasConversations && <button type="button" onClick={() => setDrawerOpen(true)} aria-label="Conversations" className={variant === "page" ? "agent-chat__mobile-only" : ""}><ChatIcon name="menu" size={19} /></button>}
         <div className="agent-chat__brand">{slots?.brand ?? <span className="agent-chat__brand-mark" aria-hidden>{brandName.slice(0, 1)}</span>}<span>{controller.activeConversationTitle || fallbackTitle}</span></div>
         <div className="agent-chat__header-status">{controller.status !== "ready" && controller.status !== "idle" ? controller.status === "streaming" ? "En cours…" : controller.status === "connecting" ? "Connexion…" : controller.status === "error" ? "Erreur" : "" : ""}</div>
         {slots?.headerTrailing}
-        {controller.newConversation && <button type="button" onClick={controller.newConversation} aria-label="Nouvelle conversation" className={`agent-chat__new-conversation${dedupeNewConversation && hasSidebar ? " agent-chat__mobile-only" : ""}`}><Plus size={18} /></button>}
-        {onExpand && <button type="button" onClick={onExpand} aria-label="Ouvrir en plein écran"><Maximize2 size={17} /></button>}
-        {onClose && <button type="button" onClick={onClose} aria-label="Fermer"><X size={18} /></button>}
+        {controller.newConversation && <button type="button" onClick={controller.newConversation} aria-label="Nouvelle conversation" className={`agent-chat__new-conversation${dedupeNewConversation && hasSidebar ? " agent-chat__mobile-only" : ""}`}><ChatIcon name="add" size={18} /></button>}
+        {onExpand && <button type="button" onClick={onExpand} aria-label="Ouvrir en plein écran"><ChatIcon name="expand" size={17} /></button>}
+        {onClose && <button type="button" onClick={onClose} aria-label="Fermer"><ChatIcon name="close" size={18} /></button>}
       </header>
       <div className="agent-chat__content">
-        {isEmpty ? <div className="agent-chat__empty">{slots?.emptyBefore}<div className="agent-chat__empty-mark">{slots?.brand ?? brandName.slice(0, 1)}</div><h2>{emptyTitle}</h2>{emptyDescription && <p>{emptyDescription}</p>}{suggestions.length > 0 && <div className="agent-chat__suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} disabled={controller.disabled} onClick={() => controller.setInput(suggestion)}>{suggestion}</button>)}</div>}{slots?.emptyAfter}<AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></div> : <><div ref={scroll} className="agent-chat__scroll" onScroll={(event) => { const node = event.currentTarget; setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 120); }}><AgentTimeline controller={controller} slots={slots} /></div>{showJump && <button type="button" className="agent-chat__jump" onClick={() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: "smooth" }); setShowJump(false); }}><ChevronDown size={15} />Bas de la conversation</button>}<footer className="agent-chat__footer"><AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></footer></>}
+        {isEmpty ? <div className="agent-chat__empty">{slots?.emptyBefore}<div className="agent-chat__empty-mark">{slots?.brand ?? brandName.slice(0, 1)}</div><h2>{emptyTitle}</h2>{emptyDescription && <p>{emptyDescription}</p>}{suggestions.length > 0 && <div className="agent-chat__suggestions">{suggestions.map((suggestion) => <button type="button" key={suggestion} disabled={controller.disabled} onClick={() => controller.setInput(suggestion)}>{suggestion}</button>)}</div>}{slots?.emptyAfter}<AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></div> : <><div ref={scroll} className="agent-chat__scroll" onScroll={(event) => { const node = event.currentTarget; setShowJump(node.scrollHeight - node.scrollTop - node.clientHeight > 120); }}><AgentTimeline controller={controller} slots={slots} /></div>{showJump && <button type="button" className="agent-chat__jump" onClick={() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight, behavior: "smooth" }); setShowJump(false); }}><ChatIcon name="chevron-down" size={15} />Bas de la conversation</button>}<footer className="agent-chat__footer"><AgentComposer controller={controller} slots={slots} placeholder={placeholder} onKeyDown={onComposerKeyDown} /></footer></>}
         {controller.error && <div className="agent-chat__error" role="alert">{controller.error}</div>}
       </div>
     </div>

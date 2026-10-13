@@ -1,5 +1,5 @@
 import { Fragment, isValidElement, useMemo, useState, type ReactNode } from "react";
-import { Check, Copy, WrapText } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { execInlineToken, splitInlineTokens, type InlineToken } from "../core/index.js";
@@ -57,8 +57,8 @@ function CodeBlock({ children }: { children?: ReactNode }) {
   }
   return <figure className="agent-chat__code-block">
     <figcaption><span>{language}</span><div>
-      <button type="button" onClick={() => setWrap(!wrap)} aria-label={wrap ? "Désactiver le retour à la ligne" : "Activer le retour à la ligne"} aria-pressed={wrap} title="Retour à la ligne"><WrapText size={14} /></button>
-      <button type="button" onClick={() => void copy()} aria-label={copied ? "Copié" : "Copier le code"}>{copied ? <Check size={14} /> : <Copy size={14} />}<span>{copied ? "Copié" : "Copier"}</span></button>
+      <button type="button" onClick={() => setWrap(!wrap)} aria-label={wrap ? "Désactiver le retour à la ligne" : "Activer le retour à la ligne"} aria-pressed={wrap} title="Retour à la ligne"><ChatIcon name="wrap" size={14} /></button>
+      <button type="button" onClick={() => void copy()} aria-label={copied ? "Copié" : "Copier le code"}>{copied ? <ChatIcon name="check" size={14} /> : <ChatIcon name="copy" size={14} />}<span>{copied ? "Copié" : "Copier"}</span></button>
     </div></figcaption>
     <pre tabIndex={0} className={wrap ? "is-wrapped" : undefined}><code className={element?.props.className}>{code}</code></pre>
     {copyError && <p className="agent-chat__code-error" role="status">Copie indisponible</p>}

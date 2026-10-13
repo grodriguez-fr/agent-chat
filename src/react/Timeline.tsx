@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Copy, RotateCcw } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import { buildThreadBlocks, formatDuration, messageText, type AgentChatController, type AgentChatSlots, type AgentMessage, type AgentMessagePart } from "../core/index.js";
 import { AgentInlineText, AgentMarkdown } from "./Markdown.js";
 import { ActivityFeed, ToolActivity } from "./ToolActivity.js";
@@ -57,8 +57,8 @@ function MessageRow({ message, controller, slots }: { message: AgentMessage; con
   return <div className={`agent-chat__message agent-chat__message--${message.role}`} data-agent-user-message={message.role === "user" ? "true" : undefined}>
     <MessageContent message={message} slots={slots} />
     {slots?.renderMessageActions ? slots.renderMessageActions(message) : text && <div className="agent-chat__message-actions">
-      <button type="button" onClick={() => void copy()} aria-label={copied ? "Copié" : "Copier"}><Copy size={13} /></button>
-      {controller.retryMessage && <button type="button" disabled={controller.status === "streaming"} onClick={() => controller.retryMessage?.(message.sourceId ?? message.id)} aria-label="Réessayer"><RotateCcw size={13} /></button>}
+      <button type="button" onClick={() => void copy()} aria-label={copied ? "Copié" : "Copier"}><ChatIcon name="copy" size={13} /></button>
+      {controller.retryMessage && <button type="button" disabled={controller.status === "streaming"} onClick={() => controller.retryMessage?.(message.sourceId ?? message.id)} aria-label="Réessayer"><ChatIcon name="retry" size={13} /></button>}
       {copyError && <span role="status">Copie indisponible</span>}
     </div>}
   </div>;
@@ -73,7 +73,7 @@ function ExecutionGroup({ block, controller, slots }: { block: Extract<ReturnTyp
   return <div className="agent-chat__execution">
     {(hasActivity || block.live || elapsed != null) && (block.live
       ? <div className="agent-chat__execution-header" role="status"><span>{label}</span></div>
-      : <button type="button" className="agent-chat__execution-header" disabled={!hasActivity} onClick={() => setOpen(!open)} aria-expanded={hasActivity ? open : undefined}><span>{label}</span>{hasActivity && (open ? <ChevronDown size={14} /> : <ChevronRight size={14} />)}</button>)}
+      : <button type="button" className="agent-chat__execution-header" disabled={!hasActivity} onClick={() => setOpen(!open)} aria-expanded={hasActivity ? open : undefined}><span>{label}</span>{hasActivity && (open ? <ChatIcon name="chevron-down" size={14} /> : <ChatIcon name="chevron-right" size={14} />)}</button>)}
     {open && hasActivity && <div className="agent-chat__execution-body">{slots?.renderActivity?.(block.messages, block.live) ?? <ActivityFeed messages={block.messages} live={block.live} slots={slots} />}</div>}
     {block.finalMessage && <div className="agent-chat__final"><MessageRow message={block.finalMessage} controller={controller} slots={slots} /></div>}
   </div>;

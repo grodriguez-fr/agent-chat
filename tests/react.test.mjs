@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { AgentChatShell, AgentComposer, AgentTimeline } from "../dist/react/index.js";
+import { AgentChatShell, AgentComposer, AgentTimeline, ChatIconsProvider } from "../dist/react/index.js";
 import { toolAction, ActivityFeed, ToolRow } from "../dist/react/ToolActivity.js";
 
 const controller = {
@@ -167,4 +167,14 @@ test("header new conversation button has a class and can defer to the column on 
   assert.match(button({ variant: "page" }), /class="agent-chat__new-conversation"/);
   assert.match(button({ variant: "page", dedupeNewConversation: true }), /class="agent-chat__new-conversation agent-chat__mobile-only"/);
   assert.match(button({ variant: "panel", dedupeNewConversation: true }), /class="agent-chat__new-conversation"/);
+});
+
+test("draws Lucide icons by default and lets the application replace them", () => {
+  const shell = React.createElement(AgentChatShell, { variant: "panel", brandName: "LOGOS", controller, open: true });
+  const lucide = renderToStaticMarkup(shell);
+  assert.match(lucide, /<svg[^>]*class="[^"]*agent-chat__icon/);
+  const icons = ({ name, size, className }) => React.createElement("span", { className, "data-icon": name, style: { fontSize: size } });
+  const custom = renderToStaticMarkup(React.createElement(ChatIconsProvider, { icons }, shell));
+  assert.doesNotMatch(custom, /<svg/);
+  assert.match(custom, /<span class="agent-chat__icon" data-icon="send"/);
 });

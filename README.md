@@ -133,3 +133,22 @@ like the header and empty state. The header button carries the
 <AgentChatShell variant="page" brandName="Logos" controller={controller}
   fallbackTitle="Nouvelle conversation" showSidebarBrand={false} dedupeNewConversation />
 ```
+
+## Icons (0.5.0)
+
+The chat names its icons by role (`send`, `close`, `spinner`, `file-search`…, see
+`ChatIconName`) and draws them with Lucide by default. An application with
+another icon set wraps the chat in `ChatIconsProvider`:
+
+```tsx
+import { ChatIconsProvider, type ChatIconRenderer } from "@grodriguez-fr/agent-chat/react";
+
+const icons: ChatIconRenderer = ({ name, size, className }) =>
+  <span className={`material-icons-outlined ${className}`} style={{ fontSize: size }} aria-hidden>{MATERIAL[name]}</span>;
+
+<ChatIconsProvider icons={icons}><AgentChatShell … /></ChatIconsProvider>
+```
+
+`className` always carries `agent-chat__icon` (and `is-spinning` for the
+spinner); the stylesheet sizes and colours icons through it, so the renderer
+must keep it. Without a provider the rendering is unchanged.

@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Copy, RotateCcw } from "lucide-react";
+import { ChatIcon } from "./icons.js";
 import { buildThreadBlocks, formatDuration, messageText } from "../core/index.js";
 import { AgentInlineText, AgentMarkdown } from "./Markdown.js";
 import { ActivityFeed, ToolActivity } from "./ToolActivity.js";
@@ -61,7 +61,7 @@ function MessageRow({ message, controller, slots }) {
             setCopyError(true);
         }
     };
-    return _jsxs("div", { className: `agent-chat__message agent-chat__message--${message.role}`, "data-agent-user-message": message.role === "user" ? "true" : undefined, children: [_jsx(MessageContent, { message: message, slots: slots }), slots?.renderMessageActions ? slots.renderMessageActions(message) : text && _jsxs("div", { className: "agent-chat__message-actions", children: [_jsx("button", { type: "button", onClick: () => void copy(), "aria-label": copied ? "Copié" : "Copier", children: _jsx(Copy, { size: 13 }) }), controller.retryMessage && _jsx("button", { type: "button", disabled: controller.status === "streaming", onClick: () => controller.retryMessage?.(message.sourceId ?? message.id), "aria-label": "R\u00E9essayer", children: _jsx(RotateCcw, { size: 13 }) }), copyError && _jsx("span", { role: "status", children: "Copie indisponible" })] })] });
+    return _jsxs("div", { className: `agent-chat__message agent-chat__message--${message.role}`, "data-agent-user-message": message.role === "user" ? "true" : undefined, children: [_jsx(MessageContent, { message: message, slots: slots }), slots?.renderMessageActions ? slots.renderMessageActions(message) : text && _jsxs("div", { className: "agent-chat__message-actions", children: [_jsx("button", { type: "button", onClick: () => void copy(), "aria-label": copied ? "Copié" : "Copier", children: _jsx(ChatIcon, { name: "copy", size: 13 }) }), controller.retryMessage && _jsx("button", { type: "button", disabled: controller.status === "streaming", onClick: () => controller.retryMessage?.(message.sourceId ?? message.id), "aria-label": "R\u00E9essayer", children: _jsx(ChatIcon, { name: "retry", size: 13 }) }), copyError && _jsx("span", { role: "status", children: "Copie indisponible" })] })] });
 }
 function ExecutionGroup({ block, controller, slots }) {
     const [open, setOpen] = useState(block.live);
@@ -71,7 +71,7 @@ function ExecutionGroup({ block, controller, slots }) {
     const hasActivity = block.messages.length > 0;
     return _jsxs("div", { className: "agent-chat__execution", children: [(hasActivity || block.live || elapsed != null) && (block.live
                 ? _jsx("div", { className: "agent-chat__execution-header", role: "status", children: _jsx("span", { children: label }) })
-                : _jsxs("button", { type: "button", className: "agent-chat__execution-header", disabled: !hasActivity, onClick: () => setOpen(!open), "aria-expanded": hasActivity ? open : undefined, children: [_jsx("span", { children: label }), hasActivity && (open ? _jsx(ChevronDown, { size: 14 }) : _jsx(ChevronRight, { size: 14 }))] })), open && hasActivity && _jsx("div", { className: "agent-chat__execution-body", children: slots?.renderActivity?.(block.messages, block.live) ?? _jsx(ActivityFeed, { messages: block.messages, live: block.live, slots: slots }) }), block.finalMessage && _jsx("div", { className: "agent-chat__final", children: _jsx(MessageRow, { message: block.finalMessage, controller: controller, slots: slots }) })] });
+                : _jsxs("button", { type: "button", className: "agent-chat__execution-header", disabled: !hasActivity, onClick: () => setOpen(!open), "aria-expanded": hasActivity ? open : undefined, children: [_jsx("span", { children: label }), hasActivity && (open ? _jsx(ChatIcon, { name: "chevron-down", size: 14 }) : _jsx(ChatIcon, { name: "chevron-right", size: 14 }))] })), open && hasActivity && _jsx("div", { className: "agent-chat__execution-body", children: slots?.renderActivity?.(block.messages, block.live) ?? _jsx(ActivityFeed, { messages: block.messages, live: block.live, slots: slots }) }), block.finalMessage && _jsx("div", { className: "agent-chat__final", children: _jsx(MessageRow, { message: block.finalMessage, controller: controller, slots: slots }) })] });
 }
 export function AgentTimeline({ controller, slots }) {
     const blocks = useMemo(() => buildThreadBlocks(controller.messages, controller.status === "streaming"), [controller.messages, controller.status]);
