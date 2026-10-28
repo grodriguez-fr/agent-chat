@@ -160,10 +160,24 @@ button.agent-chat__execution-header { cursor: pointer; }
 .agent-chat__composer-trailing .agent-chat__stop { background: color-mix(in srgb, var(--agent-danger) 10%, transparent); color: var(--agent-danger); border-radius: 999px; }
 .agent-chat__composer-trailing button:disabled { opacity: .35; cursor: default; }
 .agent-chat__composer-trailing button.is-active { background: color-mix(in srgb, var(--agent-danger) 12%, transparent); color: var(--agent-danger); }
-.agent-chat__queue { margin: -.5rem -.75rem .5rem; overflow: hidden; border-bottom: 1px solid var(--agent-border); border-radius: 1.35rem 1.35rem 0 0; background: var(--agent-surface); }
-.agent-chat__queue-row { display: flex; align-items: center; gap: .4rem; min-height: 2rem; padding: .25rem .4rem .25rem .65rem; border-bottom: 1px solid var(--agent-border); font-size: .72rem; }
-.agent-chat__queue-row:last-child { border-bottom: 0; } .agent-chat__queue-row > span, .agent-chat__queue-row > input { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.agent-chat__queue-row input { border: 0; border-bottom: 1px solid var(--agent-accent); outline: 0; background: transparent; color: inherit; }
+/* Queue: a tray attached above the composer. It is inset on both sides and slides under the
+   composer's top edge, so the two read as one control. */
+.agent-chat__composer-wrap { --agent-queue-inset: 1.375rem; --agent-queue-overlap: calc(1rem + 1px); }
+.agent-chat__composer { z-index: 1; }
+.agent-chat__queue { position: relative; z-index: 0; margin: 0 var(--agent-queue-inset) calc(-1 * var(--agent-queue-overlap)); padding-bottom: var(--agent-queue-overlap); overflow: hidden; border: 1px solid var(--agent-border); border-bottom: 0; border-radius: 1rem 1rem 0 0; background: var(--agent-surface); animation: agent-chat-queue-in .16s ease-out; }
+.agent-chat__queue-list { max-height: 8.25rem; margin: 0; padding: .2rem 0; overflow-y: auto; list-style: none; }
+.agent-chat__queue-row { display: flex; align-items: center; gap: .5rem; min-height: 2.25rem; padding: .15rem .3rem .15rem .8rem; color: var(--agent-muted); font-size: .8125rem; line-height: 1.25rem; }
+.agent-chat__queue-row + .agent-chat__queue-row { border-top: 1px solid var(--agent-border); }
+.agent-chat__queue-row > .agent-chat__icon { flex: 0 0 auto; }
+.agent-chat__queue-text, .agent-chat__queue-row > input { min-width: 0; flex: 1; overflow: hidden; color: var(--agent-text); text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.agent-chat__queue-row > input { border: 0; border-bottom: 1px solid var(--agent-accent); outline: 0; padding: .1rem 0; background: transparent; font: inherit; }
+.agent-chat__queue-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .125rem; }
+.agent-chat__queue-row button { width: 1.75rem; height: 1.75rem; border-radius: .55rem; color: var(--agent-muted); }
+.agent-chat__queue-row button:hover { background: color-mix(in srgb, var(--agent-text) 7%, transparent); color: var(--agent-text); }
+.agent-chat__queue-row .agent-chat__queue-send { color: var(--agent-text); }
+@keyframes agent-chat-queue-in { from { opacity: 0; transform: translateY(.5rem); } }
+@media (prefers-reduced-motion: reduce) { .agent-chat__queue { animation: none; } }
+@media (max-width: 767px) { .agent-chat__composer-wrap { --agent-queue-inset: .875rem; } .agent-chat__queue-row button { width: 2.25rem; height: 2.25rem; } }
 .agent-chat__empty { display: flex; width: 100%; max-width: var(--agent-content-width); min-height: 0; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; margin: 0 auto; padding: 2rem 1rem; text-align: center; }
 .agent-chat__empty-mark { width: 3.5rem; height: 3.5rem; border-radius: 1rem; font-size: 1.4rem; }
 .agent-chat__empty h2 { margin: .1rem 0 0; font-size: 1.35rem; }

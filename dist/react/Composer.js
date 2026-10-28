@@ -44,7 +44,7 @@ export function AgentComposer({ controller, slots, placeholder = "Demande Ã  lâ€
             setSubmitting(false);
         }
     };
-    return _jsxs("div", { className: "agent-chat__composer-wrap", children: [_jsxs("div", { className: "agent-chat__composer", "data-disabled": controller.disabled || undefined, children: [_jsx(ComposerQueue, { controller: controller }), slots?.composerBefore, suggestions.list, _jsx("textarea", { ref: textarea, "aria-label": "Message \u00E0 l\u2019agent", ...suggestions.textareaProps, value: controller.input, onChange: (event) => { controller.setInput(event.target.value); suggestions.trackCaret(event.target); }, placeholder: controller.disabled ? controller.disabledReason ?? placeholder : placeholder, disabled: controller.disabled, rows: 1, onKeyDown: (event) => {
+    return _jsxs("div", { className: "agent-chat__composer-wrap", children: [_jsx(ComposerQueue, { controller: controller }), _jsxs("div", { className: "agent-chat__composer", "data-disabled": controller.disabled || undefined, children: [slots?.composerBefore, suggestions.list, _jsx("textarea", { ref: textarea, "aria-label": "Message \u00E0 l\u2019agent", ...suggestions.textareaProps, value: controller.input, onChange: (event) => { controller.setInput(event.target.value); suggestions.trackCaret(event.target); }, placeholder: controller.disabled ? controller.disabledReason ?? placeholder : placeholder, disabled: controller.disabled, rows: 1, onKeyDown: (event) => {
                             if (event.nativeEvent.isComposing)
                                 return;
                             if (suggestions.handleKeyDown(event))

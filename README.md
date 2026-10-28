@@ -153,3 +153,13 @@ const icons: ChatIconRenderer = ({ name, size, className }) =>
 `className` always carries `agent-chat__icon` (and `is-spinning` for the
 spinner); the stylesheet sizes and colours icons through it, so the renderer
 must keep it. Without a provider the rendering is unchanged.
+
+## Queue tray (0.5.1)
+
+`controller.queue` is shown in a tray attached above the composer, like the
+desktop apps of Claude and ChatGPT: inset on both sides, it slides under the
+composer's top edge so both read as one control. Each row offers
+`editQueued`, `sendQueued` ("Envoyer maintenant") and `cancelQueued` when the
+controller provides them. The tray now sits outside `.agent-chat__composer`, in
+`.agent-chat__composer-wrap`; `--agent-queue-inset` and `--agent-queue-overlap`
+on the wrap adjust its geometry.

@@ -43,8 +43,9 @@ export function AgentComposer({ controller, slots, placeholder = "Demande à l�
     finally { pending.current = false; setSubmitting(false); }
   };
   return <div className="agent-chat__composer-wrap">
+    <ComposerQueue controller={controller} />
     <div className="agent-chat__composer" data-disabled={controller.disabled || undefined}>
-      <ComposerQueue controller={controller} />{slots?.composerBefore}
+      {slots?.composerBefore}
       {suggestions.list}
       <textarea ref={textarea} aria-label="Message à l’agent" {...suggestions.textareaProps} value={controller.input} onChange={(event) => { controller.setInput(event.target.value); suggestions.trackCaret(event.target); }} placeholder={controller.disabled ? controller.disabledReason ?? placeholder : placeholder} disabled={controller.disabled} rows={1} onKeyDown={(event) => {
         if (event.nativeEvent.isComposing) return;

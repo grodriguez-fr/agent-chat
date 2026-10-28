@@ -58,6 +58,22 @@ test("streaming keeps Stop available and disables send without queue support", (
   assert.doesNotMatch(queued, /class="agent-chat__send"[^>]*disabled/);
 });
 
+test("queued messages sit in a tray attached above the composer box", () => {
+  const html = renderToStaticMarkup(React.createElement(AgentComposer, {
+    controller: {
+      ...controller, status: "streaming", allowQueue: true,
+      queue: [{ id: "a", text: "Ensuite, résume" }, { id: "b", text: "Puis traduis" }],
+      editQueued() {}, sendQueued() {}, cancelQueued() {},
+    },
+  }));
+  assert.match(html, /^<div class="agent-chat__composer-wrap"><section class="agent-chat__queue" aria-label="2 messages en attente"><ol class="agent-chat__queue-list">/);
+  assert.ok(html.indexOf("agent-chat__queue") < html.indexOf('class="agent-chat__composer"'));
+  assert.equal(html.match(/aria-label="Envoyer maintenant"/g)?.length, 2);
+  assert.match(html, /title="Ensuite, résume">Ensuite, résume</);
+  const empty = renderToStaticMarkup(React.createElement(AgentComposer, { controller: { ...controller, queue: [] } }));
+  assert.doesNotMatch(empty, /agent-chat__queue/);
+});
+
 test("attachment-only prompts can send; unsupported dictation is hidden", () => {
   const html = renderToStaticMarkup(React.createElement(AgentComposer, {
     controller: { ...controller, hasAttachments: true },
