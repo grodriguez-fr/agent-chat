@@ -51,7 +51,7 @@ test("preserves commentary before tools and shows only the final answer outside 
   assert.equal(blocks[1].durationMs, null);
 });
 
-test("Talos adapter retains diffs, output, queue and explicit execution duration", () => {
+test("Legacy adapter retains diffs, output, queue and explicit execution duration", () => {
   const diffs = [{ path: "app.ts", oldText: "old", newText: "new", added: 1, removed: 1 }];
   const messages = fromLegacyMessages([
     { id: "u", role: "user", content: "Corrige", createdAt: 0 },

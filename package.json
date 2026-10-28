@@ -1,7 +1,7 @@
 {
   "name": "@grodriguez-fr/agent-chat",
   "version": "0.5.0",
-  "description": "Shared agent chat UI and client primitives for Talos, LOGOS and job-finder",
+  "description": "Shared agent chat UI and client primitives for Organisation (Logos)",
   "type": "module",
   "license": "MIT",
   "sideEffects": [

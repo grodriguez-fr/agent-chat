@@ -1,9 +1,9 @@
 # Mises à jour des applications
 
 Une release stable publiée d'agent-chat déclenche `propose-updates.yml`.
-Le workflow propose l'archive exacte et le lockfile dans Organisation, Job Finder
-et Talos. Il maintient une seule PR ouverte par application sur
-`codex/update-agent-chat`. Les préversions sont ignorées ; une version plus ancienne
+Le workflow propose l'archive exacte et le lockfile dans Organisation, seule
+application qui utilise encore agent-chat (Talos et Job Finder sont archivés). Il
+maintient une seule PR ouverte sur `codex/update-agent-chat`. Les préversions sont ignorées ; une version plus ancienne
 ne remplace pas une version déjà adoptée. Aucun merge automatique n'est configuré.
 
 ## Configuration unique
@@ -12,7 +12,7 @@ Dans les paramètres GitHub d'agent-chat, ajouter le secret Actions
 `AGENT_UPDATE_TOKEN` avec un **fine-grained personal access token** :
 
 - Propriétaire : `grodriguez-fr`.
-- Dépôts sélectionnés uniquement : `organisation`, `job-finder`, `talos`.
+- Dépôt sélectionné uniquement : `organisation`.
 - Permissions des dépôts : **Contents: Read and write** et
   **Pull requests: Read and write**. Metadata est ajouté automatiquement.
 - Choisir une expiration et renouveler le secret avant cette date.
@@ -29,21 +29,17 @@ du secret ou correction d'une release, lancer manuellement le workflow avec son 
 
 ## Validation et adoption
 
-- Organisation : contrôle TypeScript et tests existants du transport du chat dans
-  `Agent chat compatibility`, plus les autres vérifications de PR présentes.
-- Job Finder : CI existante `qa` (build, tests du bridge, unitaires et navigateur).
-- Talos : `Validate Talos` (build TypeScript/Vite et tests existants du stream).
+Organisation : contrôle TypeScript et tests existants du transport du chat dans
+`Agent chat compatibility`, plus les autres vérifications de PR présentes.
 
 Lire les notes de release et vérifier les résultats avant une fusion manuelle.
-Chaque application peut adopter la version à une date différente. Organisation
-et Job Finder déploient selon leur CI après fusion ; Talos publie une image, dont
-le déploiement sur le serveur reste une opération distincte.
+Une fusion ne déploie pas Organisation : seule une release (`pnpm release`) le fait.
 Un contrôle vert ne prouve pas à lui seul la compatibilité de tous les parcours.
 
 ## Gateway
 
 Ce workflow ne met pas à jour le gateway. Son protocole doit rester compatible
-avec les versions des trois applications en production. Une rupture nécessite
+avec la version d'Organisation en production. Une rupture nécessite
 une migration explicite. Déployer une image identifiée par digest, conserver
 l'image précédente et son cache local pour permettre un retour arrière.
 

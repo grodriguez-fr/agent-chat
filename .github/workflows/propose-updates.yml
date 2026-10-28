@@ -31,16 +31,6 @@ jobs:
             directory: web-app
             manager: pnpm
             lockfile: pnpm-lock.yaml
-          - repository: job-finder
-            base: main
-            directory: .
-            manager: npm
-            lockfile: package-lock.json
-          - repository: talos
-            base: main
-            directory: .
-            manager: npm-legacy
-            lockfile: package-lock.json
     env:
       UPDATE_TOKEN: ${{ secrets.AGENT_UPDATE_TOKEN }}
       RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
